@@ -927,8 +927,9 @@ class MainWindowLayout:
     def __init__(self, wrapper):
         # Home
         self.file_ingested = False
+        self.ingest_button = gui.Button("Ingest", key="button_ingest")
         self.home_tab = gui.Tab("Home", [ [gui.InputText(key="input_text_file", default_text=default_browse_text), gui.FileBrowse(button_text="Browse For Log File")] ,
-                                          [gui.Button("Ingest", key="button_ingest"), gui.Text(self.file_ingested, key="text_ingested_boolean")],
+                                          [self.ingest_button, gui.Text(self.file_ingested, key="text_ingested_boolean")],
                                           [gui.Button("Stat Averages", key="stat_averages"), gui.Button("Close"), gui.Button("???")],
                                         ])
 
@@ -983,6 +984,8 @@ class WindowWrapper:
         self.main = MainWindowLayout(self)
         self.window = gui.Window(self.title, self.main.layout(), location=location, **self.kwargs)
         self.main.populate_themes()
+        # TEMP
+        self.main.ingest_button.click()
 
     def change_theme(self, theme_name):
         old_window = self.window

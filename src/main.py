@@ -288,7 +288,7 @@ class RandomizerLogParser(FileParser):
             assert len(pkmn_pieces) == 12, f"Expected(12) vs Actual({len(pkmn_pieces)})"
 
             num = pkmn_pieces[0]
-            name = pkmn_pieces[1]
+            name = Pokemon.fix_unicode_name(pkmn_pieces[1])
             types = pkmn_pieces[2].split("/")
             stats = pkmn_pieces[3:9]
             abilities = [a for a in pkmn_pieces[9:11] if a != '-']
@@ -348,7 +348,7 @@ class RandomizerLogParser(FileParser):
                 break
 
             pkmn, raw_moveset = line.split(':')
-            pkmn_name = pkmn[4:].strip()
+            pkmn_name = Pokemon.fix_unicode_name(pkmn[4:].strip())
 
             curr_moveset = Pokemon.Moveset(pkmn_name)
             for learned_move_string in raw_moveset.split(','):
@@ -756,6 +756,10 @@ class Pokemon:
     def add_moveset(self, moveset):
         self.moveset = moveset
 
+    @staticmethod
+    def fix_unicode_name(name : str):
+        return name.replace("â™€", "♀").replace("â™‚", "♂").replace("â€™", "'")
+
     def debug_print(self):
         print(f"==========")
         print(f"Pokemon #{self.num}: {self.name}")
@@ -894,12 +898,12 @@ class Pokemon:
 ####################################################
 class SearchableListBox:
 
-    def __init__(self, element, size=(25,15)):
+    def __init__(self, element, size=(30,25)):
         self.uuid = uuid.uuid4().hex
         self.element = element
-        self.list_box = gui.Listbox([], key=f"SearchableListBox_ListBox_{self.uuid}", size=size, enable_events=True, select_mode="single")
-        self.input_text = gui.InputText(key=f"SearchableListBox_InputText_{self.uuid}", size=(20, 1))
-        self.button = gui.Button("Search", key=f"SearchableListBox_Button_{self.uuid}", size=(5, 1))
+        self.list_box = gui.Listbox([], key=f"SearchableListBox_ListBox_{self.uuid}", size=size, font="Arial 16", enable_events=True, select_mode="single")
+        self.input_text = gui.InputText(key=f"SearchableListBox_InputText_{self.uuid}", size=(22, 1), font="Arial 16")
+        self.button = gui.Button("Search", key=f"SearchableListBox_Button_{self.uuid}", size=(8, 1), font="Arial 16")
 
     def populate(self, values):
         self.list_box.update(values=values)
@@ -936,13 +940,13 @@ class MainWindowLayout:
         # Summary
         self.summary_search_listbox = SearchableListBox(PokemonSummaryElement())
         self.summary_add_to_team_builder_button = gui.Button("Add To Team Builder", key="pokemon_summary_add_to_team_builder_button", metadata=self.summary_search_listbox)
-        self.summary_tab = gui.Tab("Summary", [ [gui.Column(self.summary_search_listbox.element.layout()), gui.Sizer(500, 0), gui.Column([*self.summary_search_listbox.layout(),
+        self.summary_tab = gui.Tab("Summary", [ [gui.Column(self.summary_search_listbox.element.layout()), gui.Sizer(300, 0), gui.Column([*self.summary_search_listbox.layout(),
                                                                                                                        [self.summary_add_to_team_builder_button]], justification="right")],
                                               ])
 
         # Moves
         self.moves_search_listbox = SearchableListBox(MoveElement())
-        self.moves_tab = gui.Tab("Moves", [ [gui.Column(self.moves_search_listbox.element.layout()), gui.Sizer(500, 0), gui.Column(self.moves_search_listbox.layout())],
+        self.moves_tab = gui.Tab("Moves", [ [gui.Column(self.moves_search_listbox.element.layout()), gui.Sizer(300, 0), gui.Column(self.moves_search_listbox.layout())],
                                           ])
 
         # Team Builder
@@ -950,20 +954,26 @@ class MainWindowLayout:
         self.team_analysis_element = TeamAnalysisElement(self.team_builder_elements)
         tb_column1 = gui.Column([ *self.team_builder_elements[0].layout(), *self.team_builder_elements[2].layout(), *self.team_builder_elements[4].layout() ])
         tb_column2 = gui.Column([ *self.team_builder_elements[1].layout(), *self.team_builder_elements[3].layout(), *self.team_builder_elements[5].layout() ])
-        self.team_builder_tab = gui.Tab("Team Builder", [ [gui.Frame("Pokemon Team", [[tb_column1, tb_column2]]), gui.Column(self.team_analysis_element.layout())],
-                                                          [ gui.Button("Randomize Team", key="team_builder_randomize_team_button"),
-                                                            gui.Button("Randomize Remaining", key="team_builder_randomize_remaining_button"),
-                                                            gui.Button("Clear Team", key="team_builder_clear_team_button"),
-                                                          ]
-                                                        ])
+        left_column = gui.Column([  [ gui.Frame("Pokemon Team", [[tb_column1, tb_column2]]) ],
+                                    [ gui.Button("Randomize Team", key="team_builder_randomize_team_button", size=(10,2)),
+                                      gui.Button("Randomize Remaining", key="team_builder_randomize_remaining_button", size=(10,2)),
+                                      gui.Button("Clear Team", key="team_builder_clear_team_button", size=(10,2)),
+                                    ],
+                                 ])
+        right_column = gui.Column(self.team_analysis_element.layout())
+        self.team_builder_tab = gui.Tab("Team Builder", [ [left_column, right_column] ]
+                                                    , element_justification="top")
 
         # Options
         self.theme_search_listbox = SearchableListBox(ThemeChangingElement(wrapper))
-        self.options_tab = gui.Tab("Options", [ [gui.Text("Select A Theme:"), gui.Text(f"[Currently: {gui.theme()}]")],
+        self.options_tab = gui.Tab("Options", [ [gui.Text("Select A Theme:", font="Arial 16"), gui.Text(f"[Currently: {gui.theme()}]", font="Arial 16")],
                                                 *self.theme_search_listbox.layout()
-                                              ])
+                                              ]
+                                            , element_justification="right")
 
-        self.tab_group = gui.TabGroup([[self.home_tab, self.summary_tab, self.moves_tab, self.team_builder_tab, self.options_tab]], key=f"main_window_layout_tab_group_{uuid.uuid4().hex}")
+        self.tab_group = gui.TabGroup([[self.home_tab, self.summary_tab, self.moves_tab, self.team_builder_tab, self.options_tab]]
+                                    , key=f"main_window_layout_tab_group_{uuid.uuid4().hex}"
+                                    , font="Impact 12")
 
     def layout(self):
         return [[self.tab_group]]
@@ -1087,7 +1097,7 @@ class TeamDisplayElement:
         self.current_pokemon = None
         self.on_update = lambda: None
 
-        self.clear_button = gui.Button("X", key=f"team_display_element_clear_{self.uuid}", metadata=self, disabled=True)
+        self.clear_button = gui.Button("X", key=f"team_display_element_clear_{self.uuid}", size=(2,1), metadata=self, disabled=True)
         self.title = gui.Text(f"", key=f"team_display_element_title_{self.uuid}", size=(10, 1), font="Impact 14", enable_events=True)
         self.primary_type_button = Pokemon.Type.create_button(f"team_display_element_type_primary_{self.uuid}")
         self.secondary_type_button = Pokemon.Type.create_button(f"team_display_element_type_secondary_{self.uuid}")
@@ -1153,7 +1163,7 @@ Example:
     then the team as a whole will still be rated as "weak" to WATER.
     However, if you were to add another Pokemon that was resistant to WATER, the weakness would be removed.
 """
-        self.weakness_explanation_button = gui.Button("?", key=f"explanation_button_weakness_{self.uuid}", metadata=wex)
+        self.weakness_explanation_button = gui.Button("?", key=f"explanation_button_weakness_{self.uuid}", size=(2,1), metadata=wex)
 
         rex = """\
 "Resistances" indicate types that, on average, are less effective against your team as a whole.
@@ -1167,7 +1177,7 @@ Example:
     then the team as a whole will still be rated as "resistant" to WATER.
     However, if you were to add another Pokemon that was weak to WATER, the resistance would be removed.
 """
-        self.resistance_explanation_button = gui.Button("?", key=f"explanation_button_resistance_{self.uuid}", metadata=rex)
+        self.resistance_explanation_button = gui.Button("?", key=f"explanation_button_resistance_{self.uuid}", size=(2,1), metadata=rex)
 
         mex = """\
 "Missing" indicate types that no Pokemon on your team are resistant to. If an opposing pokemon
@@ -1176,7 +1186,7 @@ were to use a move of that type, then all Pokemon on your team would at least ta
 This is usually a sign of a non-diversely typed team, and adding a Pokemon that has a resistance
 to that type will remove the type from the "Missing" list.
 """
-        self.missing_explanation_button = gui.Button("?", key=f"explanation_button_resistance_{self.uuid}", metadata=mex)
+        self.missing_explanation_button = gui.Button("?", key=f"explanation_button_resistance_{self.uuid}", size=(2,1), metadata=mex)
 
         self.team_weakness_type_buttons = [Pokemon.Type.create_button(f"team_analysis_element_weakness_button_{i}_{self.uuid}") for i in range(len(all_types))]
         self.team_resistance_type_buttons = [Pokemon.Type.create_button(f"team_analysis_element_resistance_button_{i}_{self.uuid}") for i in range(len(all_types))]
@@ -1375,6 +1385,7 @@ def main():
                 print("==== Event: Summary Chooser Click ====")
 
             [selected_name] = wrapper.main.summary_search_listbox.currently_selected()
+            print(selected_name)
             currently_selected_pokemon = next((pkmn for pkmn in pokemon if pkmn.name == selected_name), None)
             assert currently_selected_pokemon is not None
             wrapper.main.summary_search_listbox.update(currently_selected_pokemon)

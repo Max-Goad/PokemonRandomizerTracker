@@ -117,13 +117,13 @@ class ThemeChangingElement:
 ####################################################
 ## Other (Temp?)
 ####################################################
-def popupStatAverages(pokemon: typing.List[pokemon.Pokemon]):
+def popupStatAverages(all_pokemon: typing.List[pokemon.Pokemon]):
     # Group raw stats by attribute
     grouped_raw_stats = {}
     grouped_raw_stats : typing.Dict[str, int]
     for attr_name in pokemon.Stats.ALL_ATTR_NAMES:
         grouped_raw_stats[attr_name] = []
-        for pkmn in pokemon:
+        for pkmn in all_pokemon:
             grouped_raw_stats[attr_name].append(getattr(pkmn.stats,attr_name).value)
 
     # Covert raw counts into Counter objects

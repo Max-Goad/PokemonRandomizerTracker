@@ -6,7 +6,7 @@ class RandomizerLogParser(parsers.FileParser):
     """
     TODO: Documentation
     """
-    POKEMON_SUMMARY_HEADER = r"Pokemon Base Stats & Types"
+    pokemon_display_HEADER = r"Pokemon Base Stats & Types"
     POKEMON_MOVE_HEADER = r"Move Data"
     POKEMON_MOVESET_HEADER = r"Pokemon Movesets"
     WILD_POKEMON_HEADER = r"Wild Pokemon"
@@ -18,7 +18,7 @@ class RandomizerLogParser(parsers.FileParser):
         pass
 
     def _header_regexes(self):
-        return [self.POKEMON_SUMMARY_HEADER]
+        return [self.pokemon_display_HEADER]
 
     def _valid(self):
         try:
@@ -32,7 +32,7 @@ class RandomizerLogParser(parsers.FileParser):
         self.reset()
 
         # Find start
-        self.moveAndGetGroups(self.POKEMON_SUMMARY_HEADER)
+        self.moveAndGetGroups(self.pokemon_display_HEADER)
 
         # Move past headers
         self.current_line += 2

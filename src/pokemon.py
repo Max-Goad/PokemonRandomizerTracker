@@ -1,3 +1,4 @@
+import typing
 import PySimpleGUI as gui
 
 from src import types
@@ -15,9 +16,14 @@ class Pokemon:
         self.abilities = abilities
         self.items = items
         self.moves = {}
+        self.moveset = []
+        self.wild_occurrences : typing.List[WildOccurrence] = []
 
     def addMoveset(self, moveset):
         self.moveset = moveset
+
+    def addWildOccurrences(self, wild_occurrences):
+        self.wild_occurrences = wild_occurrences
 
     def __repr__(self):
         return f"Pokemon[{self.name}]"
@@ -148,3 +154,28 @@ class Location:
         self.pkmn_name = pkmn_name
         self.level_min = level_min
         self.level_max = level_max
+
+####################################################
+class WildOccurrence:
+    def __init__(self, pkmn_name, location, levels):
+        self.pkmn_name = pkmn_name
+        self.location = location
+        self.levels = levels
+
+    def condensedLevelStr(self) -> str:
+        # Original: [0,1,2,3,4,5,6,7,8,9,10,15,20,21,22,23,24,25]
+        level_ranges_step1 = utils.to_ranges(self.levels)
+        # Step 1: [(0,10), (15,15), (20,25)]
+        level_ranges_step2 = []
+        for x,y in level_ranges_step1:
+            if x == y:
+                level_ranges_step2.append(str(x))
+            else:
+                level_ranges_step2.append(f"{x}-{y}")
+        # Step 2: ["0-10", "15", "20-25"]
+        level_ranges_step3 = ", ".join(level_ranges_step2)
+        # Step 3: "0-10, 15, 20-25"
+        return level_ranges_step3
+
+    def __repr__(self):
+        return f"Wild Pokemon Occurrence[{self.pkmn_name},{self.location},{self.levels}]"

@@ -1,10 +1,14 @@
+import collections
+import itertools
+import pprint
+import typing
+
 from src import pokemon
-from src.external import parsers
+from src.external import parsers, utils
 from src.external.parsers import InvalidFormatError
 
 class RandomizerLogParser(parsers.FileParser):
-    """
-    TODO: Documentation
+    """ TODO: Documentation
     """
     POKEMON_DISPLAY_HEADER = r"Pokemon Base Stats & Types"
     POKEMON_MOVE_HEADER = r"Move Data"
@@ -122,7 +126,7 @@ class RandomizerLogParser(parsers.FileParser):
             self.current_line += 1
         return movesets
 
-    def extractWildPokemon(self):
+    def extractWildOccurrences(self):
         # Move marker back to start
         self.reset()
 
@@ -132,7 +136,7 @@ class RandomizerLogParser(parsers.FileParser):
         # Move past headers
         self.current_line += 1
 
-        wild_pkmn_locations = []
+        wild_pkmn_occurrences = collections.defaultdict(list)
 
         # Loop until empty line encountered
         while True:
@@ -140,12 +144,35 @@ class RandomizerLogParser(parsers.FileParser):
             if not line.strip():
                 break
 
-            set_num, raw_location, raw_pkmn_list = line.split('-')
-            # Rate is currently unused
-            location_name, rate = parsers.getGroups(r"([\w\s?]+)[(]rate=(\d+)[)]", raw_location.strip())
+            # set_num is currently unused
+            set_num, raw_location, raw_pkmn_list = line.split(' - ')
+            # rate is currently unused
+            location_name, rate = parsers.getGroups(r"(.+)[(]rate=(\d+)[)]", raw_location.strip())
+            location_name = location_name.strip()
             raw_pkmn = raw_pkmn_list.split(',')
 
-            # TODO
+            # Extract mapping from list of raw pokemon/level pairs
+            pkmn_level_mapping = collections.defaultdict(set)
+            for raw in raw_pkmn:
+                # Pokemon Level Mappings can come in 2 forms:
+                #   1) "Bulbasaur Lvs XX-YY"
+                #   2) "Bulbasaur LvXX"
+                # In any case, we must compile all these occurrences together into one mapping:
+                #   { "Bulbasaur" : (XX, YY) }
+                # where XX is the min, and YY is the max
+                if "Lvs" in raw:
+                    pkmn_name, lvl_range = raw.split(" Lvs ")
+                    pkmn_name = pokemon.fix_unicode_name(pkmn_name.strip())
+                    min_level, max_level = (int(l) for l in lvl_range.split('-'))
+                    pkmn_level_mapping[pkmn_name].update(range(min_level, max_level+1))
+                elif "Lv" in raw:
+                    pkmn_name, level = raw.split(" Lv")
+                    pkmn_name = pokemon.fix_unicode_name(pkmn_name.strip())
+                    pkmn_level_mapping[pkmn_name].add(int(level.strip()))
+
+            for pkmn_name, levels in pkmn_level_mapping.items():
+                wild_pkmn_occurrences[pkmn_name].append(pokemon.WildOccurrence(pkmn_name, location_name, levels))
 
             self.current_line += 1
-        return wild_pkmn_locations
+
+        return wild_pkmn_occurrences

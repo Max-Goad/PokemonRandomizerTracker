@@ -39,7 +39,7 @@ class MainWindowLayout:
         # Summary
         self.pokemon_display_slb = SearchableListBox(PokemonDisplayElement())
         self.display_add_to_team_builder_button = gui.Button("Add To Team Builder", key="pokemon_display_add_to_team_builder_button", metadata=self.pokemon_display_slb)
-        self.display_tab = gui.Tab("Display", [ [gui.Column(self.pokemon_display_slb.element.layout()), gui.Sizer(300, 0), gui.Column([*self.pokemon_display_slb.layout(),
+        self.display_tab = gui.Tab("Display", [ [gui.Column(self.pokemon_display_slb.element.layout()), gui.Column([*self.pokemon_display_slb.layout(),
                                                                                                                        [self.display_add_to_team_builder_button]], justification="right")],
                                               ])
 
@@ -159,6 +159,7 @@ def main():
 
     all_pokemon = []
     currently_selected_pokemon = None
+    currently_selected_pokemon : pokemon.Pokemon
 
     moves = []
     currently_selected_move = None
@@ -187,10 +188,12 @@ def main():
             current_tab_key = wrapper.main.tab_group.Get()
             if current_tab_key == "Home":
                 wrapper.window["button_ingest"].Click()
-            elif current_tab_key == "Pokemon":
+            elif current_tab_key == "Display":
                 wrapper.main.pokemon_display_slb.button.Click()
             elif current_tab_key == "Moves":
                 wrapper.main.pokemon_move_slb.button.Click()
+            elif current_tab_key == "Team Builder":
+                pass
             elif current_tab_key == "Options":
                 wrapper.main.theme_slb.button.Click()
             else:
@@ -199,6 +202,8 @@ def main():
         # Check for all other keyboard events
         elif len(event) == 1 or event.startswith("Shift")\
                              or event.startswith("Ctrl")\
+                             or event.startswith("Control")\
+                             or event.startswith("Alt")\
                              or event.startswith("MouseWheel")\
                              or event.startswith("BackSpace")\
                              or event.startswith("Delete")\
@@ -227,13 +232,18 @@ def main():
             print(f"Extracted {len(moves)} moves")
 
             movesets = ingester.extractMovesets()
-            print(f"Extracted {len(movesets)} movesets")
-
             # Add movesets to pokemon
             for moveset in movesets:
                 for pkmn in all_pokemon:
                     if moveset.pkmn_name == pkmn.name:
                         pkmn.addMoveset(moveset)
+            print(f"Extracted movesets for {len(movesets)} pokemon")
+
+            wild_pokemon_occurrences = ingester.extractWildOccurrences()
+            # Add wild occurrences to pokemon
+            for pkmn in all_pokemon:
+                pkmn.addWildOccurrences(wild_pokemon_occurrences[pkmn.name])
+            print(f"Extracted wild occurrences for {len(wild_pokemon_occurrences)} pokemon")
 
             # Update Team Builder Screen
             wrapper.main.team_analysis_element.update()
@@ -268,6 +278,9 @@ def main():
             currently_selected_pokemon = next((pkmn for pkmn in all_pokemon if pkmn.name == selected_name), None)
             assert currently_selected_pokemon is not None
             wrapper.main.pokemon_display_slb.update(currently_selected_pokemon)
+
+            # TEMP
+            pprint(currently_selected_pokemon.wild_occurrences)
 
         ################################################################################
         elif event in wrapper.main.pokemon_move_slb.eventKeys():

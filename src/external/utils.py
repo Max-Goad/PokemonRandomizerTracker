@@ -2,6 +2,13 @@ import colorsys
 import itertools
 import pathlib
 
+def to_ranges(iterable):
+    iterable = sorted(set(iterable))
+    for key, group in itertools.groupby(enumerate(iterable),
+                                        lambda t: t[1] - t[0]):
+        group = list(group)
+        yield group[0][1], group[-1][1]
+
 def resource(path):
     root_dir = pathlib.Path()
     while not (root_dir / ".git").exists():

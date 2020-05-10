@@ -51,9 +51,9 @@ to that type will remove the type from the "Missing" list.
 """
         self.missing_explanation_button = gui.Button("?", key=f"explanation_button_resistance_{self.uuid}", size=(2,1), metadata=mex)
 
-        self.team_weakness_type_buttons = [pokemon.Type.create_button(f"team_analysis_element_weakness_button_{i}_{self.uuid}") for i in range(len(types.all_types))]
-        self.team_resistance_type_buttons = [pokemon.Type.create_button(f"team_analysis_element_resistance_button_{i}_{self.uuid}") for i in range(len(types.all_types))]
-        self.team_missing_type_buttons = [pokemon.Type.create_button(f"team_analysis_element_missing_button_{i}_{self.uuid}") for i in range(len(types.all_types))]
+        self.team_weakness_type_buttons = [pokemon.Type.createButton(f"team_analysis_element_weakness_button_{i}_{self.uuid}") for i in range(len(types.all_types))]
+        self.team_resistance_type_buttons = [pokemon.Type.createButton(f"team_analysis_element_resistance_button_{i}_{self.uuid}") for i in range(len(types.all_types))]
+        self.team_missing_type_buttons = [pokemon.Type.createButton(f"team_analysis_element_missing_button_{i}_{self.uuid}") for i in range(len(types.all_types))]
 
 
     def update(self):
@@ -62,10 +62,10 @@ to that type will remove the type from the "Missing" list.
 
         combined_mappings = {}
         if len(team_pkmn) != 0:
-            combined_mappings = reduce(lambda x,y: types.calculator.combine_mappings(x, y), [pkmn.type.defence_mapping() for pkmn in team_pkmn])
-        team_weaknesses = set(types.calculator.filter_weaknesses(combined_mappings).keys())
-        team_resistances = set(types.calculator.filter_resistances(combined_mappings).keys())
-        combined_individual_resistances = set(utils.flatten([types.calculator.filter_resistances(pkmn.type.defence_mapping()).keys() for pkmn in team_pkmn]))
+            combined_mappings = reduce(lambda x,y: types.calculator.combineMappings(x, y), [pkmn.type.defenceMapping() for pkmn in team_pkmn])
+        team_weaknesses = set(types.calculator.filterWeaknesses(combined_mappings).keys())
+        team_resistances = set(types.calculator.filterResistances(combined_mappings).keys())
+        combined_individual_resistances = set(utils.flatten([types.calculator.filterResistances(pkmn.type.defenceMapping()).keys() for pkmn in team_pkmn]))
         missing_individual_resistances = {x for x in types.all_types if x not in combined_individual_resistances}
 
         # print(f"Combined mapping: {combined_mappings}")
@@ -79,13 +79,9 @@ to that type will remove the type from the "Missing" list.
         subsample = 6
 
         for i in range(len(types.all_types)):
-            pokemon.Type.update_button(self.team_weakness_type_buttons[i], next(w_iter, None), subsample=subsample)
-            pokemon.Type.update_button(self.team_resistance_type_buttons[i], next(r_iter, None), subsample=subsample)
-            pokemon.Type.update_button(self.team_missing_type_buttons[i], next(m_iter, None), subsample=subsample)
-
-
-    def calculate_type_vulnerabilities(self, pokemon : typing.List[pokemon.Pokemon]):
-        pass
+            pokemon.Type.updateButton(self.team_weakness_type_buttons[i], next(w_iter, None), subsample=subsample)
+            pokemon.Type.updateButton(self.team_resistance_type_buttons[i], next(r_iter, None), subsample=subsample)
+            pokemon.Type.updateButton(self.team_missing_type_buttons[i], next(m_iter, None), subsample=subsample)
 
     def layout(self):
         return [ [gui.Column([[gui.Text("Weaknesses:", size=(10,1)), self.weakness_explanation_button],   *[[x] for x in self.team_weakness_type_buttons]]),

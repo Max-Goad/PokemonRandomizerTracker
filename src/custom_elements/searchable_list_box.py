@@ -12,7 +12,7 @@ class SearchableListBox:
     def populate(self, values):
         self.list_box.update(values=values)
 
-    def set_selection(self, name):
+    def setSelection(self, name):
         name_index = self.list_box.get_list_values().index(name)
         self.list_box.update(set_to_index=name_index, scroll_to_index=name_index)
 
@@ -20,10 +20,10 @@ class SearchableListBox:
         self.input_text.update("")
         self.element.update(values)
 
-    def currently_selected(self):
+    def currentlySelected(self):
         return self.list_box.get()
 
-    def event_keys(self):
+    def eventKeys(self):
         return (self.list_box.Key, self.button.Key)
 
     def layout(self):

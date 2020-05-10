@@ -6,7 +6,7 @@ class RandomizerLogParser(parsers.FileParser):
     """
     TODO: Documentation
     """
-    pokemon_display_HEADER = r"Pokemon Base Stats & Types"
+    POKEMON_DISPLAY_HEADER = r"Pokemon Base Stats & Types"
     POKEMON_MOVE_HEADER = r"Move Data"
     POKEMON_MOVESET_HEADER = r"Pokemon Movesets"
     WILD_POKEMON_HEADER = r"Wild Pokemon"
@@ -18,7 +18,7 @@ class RandomizerLogParser(parsers.FileParser):
         pass
 
     def _header_regexes(self):
-        return [self.pokemon_display_HEADER]
+        return [self.POKEMON_DISPLAY_HEADER]
 
     def _valid(self):
         try:
@@ -32,7 +32,7 @@ class RandomizerLogParser(parsers.FileParser):
         self.reset()
 
         # Find start
-        self.moveAndGetGroups(self.pokemon_display_HEADER)
+        self.moveAndGetGroups(self.POKEMON_DISPLAY_HEADER)
 
         # Move past headers
         self.current_line += 2
@@ -116,7 +116,7 @@ class RandomizerLogParser(parsers.FileParser):
             for learned_move_string in raw_moveset.split(','):
                 learned_move_string = learned_move_string.strip()
                 move_name, level = learned_move_string.strip().split("at level")
-                curr_moveset.add_mapping(int(level), move_name.strip())
+                curr_moveset.addMapping(int(level), move_name.strip())
             movesets.append(curr_moveset)
 
             self.current_line += 1
@@ -132,7 +132,7 @@ class RandomizerLogParser(parsers.FileParser):
         # Move past headers
         self.current_line += 1
 
-        wild_pokemon_locations = []
+        wild_pkmn_locations = []
 
         # Loop until empty line encountered
         while True:
@@ -140,12 +140,12 @@ class RandomizerLogParser(parsers.FileParser):
             if not line.strip():
                 break
 
-            set_num, raw_location, raw_pokemon_list = line.split('-')
+            set_num, raw_location, raw_pkmn_list = line.split('-')
             # Rate is currently unused
             location_name, rate = parsers.getGroups(r"([\w\s?]+)[(]rate=(\d+)[)]", raw_location.strip())
-            raw_pokemon = raw_pokemon_list.split(',')
+            raw_pkmn = raw_pkmn_list.split(',')
 
             # TODO
 
             self.current_line += 1
-        return wild_pokemon_locations
+        return wild_pkmn_locations

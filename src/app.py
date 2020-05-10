@@ -117,7 +117,7 @@ class ThemeChangingElement:
 ####################################################
 ## Other (Temp?)
 ####################################################
-def popup_stat_averages(pokemon: typing.List[pokemon.Pokemon]):
+def popupStatAverages(pokemon: typing.List[pokemon.Pokemon]):
     # Group raw stats by attribute
     grouped_raw_stats = {}
     grouped_raw_stats : typing.Dict[str, int]
@@ -233,7 +233,7 @@ def main():
             for moveset in movesets:
                 for pkmn in all_pokemon:
                     if moveset.pkmn_name == pkmn.name:
-                        pkmn.add_moveset(moveset)
+                        pkmn.addMoveset(moveset)
 
             # Update Team Builder Screen
             wrapper.main.team_analysis_element.update()
@@ -247,7 +247,7 @@ def main():
             wrapper.main.pokemon_move_slb.populate([m.name for m in moves])
 
         ################################################################################
-        elif event in wrapper.main.pokemon_display_slb.event_keys():
+        elif event in wrapper.main.pokemon_display_slb.eventKeys():
             if len(all_pokemon) == 0:
                 gui.popup_error("No Pokemon have been ingested")
                 continue
@@ -259,18 +259,18 @@ def main():
                 name_snippet = values[wrapper.main.pokemon_display_slb.input_text.Key]
                 [name_to_search] = difflib.get_close_matches(name_snippet, names, n=1, cutoff=0)
                 print(f"'{name_snippet}' found the match '{name_to_search}'")
-                wrapper.main.pokemon_display_slb.set_selection(name_to_search)
+                wrapper.main.pokemon_display_slb.setSelection(name_to_search)
             else:
                 print("==== Event: Display Chooser Click ====")
 
-            [selected_name] = wrapper.main.pokemon_display_slb.currently_selected()
+            [selected_name] = wrapper.main.pokemon_display_slb.currentlySelected()
             print(selected_name)
             currently_selected_pokemon = next((pkmn for pkmn in all_pokemon if pkmn.name == selected_name), None)
             assert currently_selected_pokemon is not None
             wrapper.main.pokemon_display_slb.update(currently_selected_pokemon)
 
         ################################################################################
-        elif event in wrapper.main.pokemon_move_slb.event_keys():
+        elif event in wrapper.main.pokemon_move_slb.eventKeys():
             if len(all_pokemon) == 0:
                 gui.popup_error("No Pokemon have been ingested")
                 continue
@@ -282,17 +282,17 @@ def main():
                 name_snippet = values[wrapper.main.pokemon_move_slb.input_text.Key]
                 [name_to_search] = difflib.get_close_matches(name_snippet, names, n=1, cutoff=0)
                 print(f"'{name_snippet}' found the match '{name_to_search}'")
-                wrapper.main.pokemon_move_slb.set_selection(name_to_search)
+                wrapper.main.pokemon_move_slb.setSelection(name_to_search)
             else:
                 print("==== Event: Moves Chooser Click ====")
 
-            [selected_name] = wrapper.main.pokemon_move_slb.currently_selected()
+            [selected_name] = wrapper.main.pokemon_move_slb.currentlySelected()
             currently_selected_move = next((move for move in moves if move.name == selected_name), None)
             assert currently_selected_move is not None
             wrapper.main.pokemon_move_slb.update(currently_selected_move)
 
         ################################################################################
-        elif event in wrapper.main.theme_slb.event_keys():
+        elif event in wrapper.main.theme_slb.eventKeys():
             # TODO: Fix copy-paste code!
             if event == wrapper.main.theme_slb.button.Key:
                 print("==== Event: Theme Chooser Button ====")
@@ -301,14 +301,14 @@ def main():
                 name_snippet = values[wrapper.main.theme_slb.input_text.Key]
                 [name_to_search] = difflib.get_close_matches(name_snippet, names, n=1, cutoff=0)
                 print(f"'{name_snippet}' found the match '{name_to_search}'")
-                wrapper.main.theme_slb.set_selection(name_to_search)
+                wrapper.main.theme_slb.setSelection(name_to_search)
             else:
                 print("==== Event: Theme Chooser Click ====")
 
-            [selected_name] = wrapper.main.theme_slb.currently_selected()
+            [selected_name] = wrapper.main.theme_slb.currentlySelected()
             wrapper.main.theme_slb.update(selected_name)
 
-            #[selected_name] = pokemon_display_slb.currently_selected()
+            #[selected_name] = pokemon_display_slb.currentlySelected()
             #currently_selected_pokemon = next((pkmn for pkmn in all_pokemon if pkmn.name == selected_name), None)
             #assert currently_selected_pokemon is not None
             #pokemon_display_slb.update(currently_selected_pokemon)
@@ -320,7 +320,7 @@ def main():
                 gui.popup_error("No Pokemon have been ingested")
                 continue
 
-            popup_stat_averages(all_pokemon)
+            popupStatAverages(all_pokemon)
 
         ################################################################################
         elif event in ("listbox_theme",):
@@ -342,7 +342,7 @@ def main():
         elif event.startswith("pokemon_display_add_to_team_builder_button"):
             print("=== Event: Add Pokemon To Team Builder ===")
             display_slb : SearchableListBox = wrapper.window[event].metadata
-            [selected_name] = display_slb.currently_selected()
+            [selected_name] = display_slb.currentlySelected()
             currently_selected_pokemon : pokemon.Pokemon = next((pkmn for pkmn in all_pokemon if pkmn.name == selected_name), None)
             assert currently_selected_pokemon is not None
 

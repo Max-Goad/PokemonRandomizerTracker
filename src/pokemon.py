@@ -16,20 +16,8 @@ class Pokemon:
         self.items = items
         self.moves = {}
 
-    def add_moveset(self, moveset):
+    def addMoveset(self, moveset):
         self.moveset = moveset
-
-    @staticmethod
-
-    def debug_print(self):
-        print(f"==========")
-        print(f"Pokemon #{self.num}: {self.name}")
-        print(f"==========")
-        print(f"Type      = {self.type}")
-        print(f"Stats     = {self.stats}")
-        print(f"Abilities = {self.abilities}")
-        print(f"Items     = {self.items}")
-        print(f"==========")
 
     def __repr__(self):
         return f"Pokemon[{self.name}]"
@@ -61,10 +49,10 @@ class Stats:
             self.maximum = maximum
 
         @staticmethod
-        def create_graph(key=None):
+        def createGraph(key=None):
             return gui.Graph(canvas_size=(Stats.Attribute.GRAPH_MAX, 10), graph_bottom_left=(0,0), graph_top_right=(Stats.Attribute.GRAPH_MAX, 10), key=key)
 
-        def draw_on(self, graph: gui.Graph):
+        def drawOn(self, graph: gui.Graph):
             graph.erase()
             scaled_value = (self.value*(self.GRAPH_MAX/self.maximum))
             graph.draw_rectangle((0, 10), (scaled_value, 0), fill_color=self._colour(scaled_value))
@@ -93,30 +81,30 @@ class Type:
         else:
             raise Exception
 
-    def defence_mapping(self):
+    def defenceMapping(self):
         if self.secondary is None:
-            return types.calculator.defence_mapping(self.primary)
+            return types.calculator.defenceMapping(self.primary)
         else:
-            a = types.calculator.defence_mapping(self.primary)
-            b = types.calculator.defence_mapping(self.secondary)
-            return types.calculator.combine_mappings(a, b)
+            a = types.calculator.defenceMapping(self.primary)
+            b = types.calculator.defenceMapping(self.secondary)
+            return types.calculator.combineMappings(a, b)
 
     @staticmethod
-    def create_button(key=None):
+    def createButton(key=None):
         return gui.Button("", key=key, button_color=(gui.theme_background_color(), gui.theme_background_color()), border_width=0, image_filename="", disabled=True)
 
     @staticmethod
-    def update_button(button, type_str, subsample=5):
+    def updateButton(button, type_str, subsample=5):
         if type_str is not None:
             button.update(image_filename=utils.resource(f"types/{type_str.lower()}.png"), image_size=(500/subsample,160/subsample), image_subsample=subsample, disabled=False)
         else:
             button.update(image_filename="", disabled=True)
 
 
-    def update_buttons(self, primary_button, secondary_button=None, subsample=5):
-        self.update_button(primary_button, self.primary, subsample=subsample)
+    def updateButtons(self, primary_button, secondary_button=None, subsample=5):
+        self.updateButton(primary_button, self.primary, subsample=subsample)
         if secondary_button is not None:
-            self.update_button(secondary_button, self.secondary, subsample=subsample)
+            self.updateButton(secondary_button, self.secondary, subsample=subsample)
 
 
     def __str__(self):
@@ -143,7 +131,7 @@ class Moveset:
         self.pkmn_name = pkmn_name
         self.level_move_mappings = []
 
-    def add_mapping(self, level, move_name):
+    def addMapping(self, level, move_name):
         self.level_move_mappings.append((level, move_name))
 
     def __str__(self):

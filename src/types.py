@@ -347,11 +347,11 @@ class TypeMatchupCalculator:
         else:
             return self.mapping[attacking_type][defending_type] * self.mapping[attacking_type][secondary_defending_type]
 
-    def defence_mapping(self, defending_type, filter_lambda=lambda x:True) -> TypeMapping:
+    def defenceMapping(self, defending_type, filter_lambda=lambda x:True) -> TypeMapping:
         """Returns the mapping for a given defending type."""
         return {attacking_type:def_dict[defending_type] for attacking_type, def_dict in self.mapping.items() if filter_lambda(def_dict[defending_type])}
 
-    def combine_mappings(self, a : TypeMapping, b : TypeMapping) -> TypeMapping:
+    def combineMappings(self, a : TypeMapping, b : TypeMapping) -> TypeMapping:
         """Combines two mappings together, multiplying common elements."""
         # First generate common elements
         common_mapping = {}
@@ -364,11 +364,11 @@ class TypeMatchupCalculator:
         # common values being multiplied together.
         return {**a, **b, **common_mapping}
 
-    def filter_resistances(self, mapping : TypeMapping) -> TypeMapping:
+    def filterResistances(self, mapping : TypeMapping) -> TypeMapping:
         """Filters a TypeMapping to contain only resistances"""
         return {k:v for k,v in mapping.items() if v < 1}
 
-    def filter_weaknesses(self, mapping : TypeMapping) -> TypeMapping:
+    def filterWeaknesses(self, mapping : TypeMapping) -> TypeMapping:
         """Filters a TypeMapping to contain only weaknesses"""
         return {k:v for k,v in mapping.items() if v > 1}
 

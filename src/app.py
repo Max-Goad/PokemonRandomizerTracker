@@ -15,11 +15,7 @@ import typing
 import uuid
 
 from src import parsers, pokemon, types
-from src.elements.searchable_list_box import SearchableListBox
-from src.elements.pokemon_display import PokemonDisplayElement
-from src.elements.pokemon_move import MoveElement
-from src.elements.team_display import TeamDisplayElement
-from src.elements.team_analysis import TeamAnalysisElement
+from src.elements import PokemonDisplayElement, MoveElement, SearchableListBox, TeamDisplayElement, TeamAnalysisElement
 from src.external import utils
 
 ####################################################

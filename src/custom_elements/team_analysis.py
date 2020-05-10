@@ -4,7 +4,7 @@ import typing
 import uuid
 
 from src import pokemon, types
-from src.elements.team_display import TeamDisplayElement
+from src.custom_elements.team_display import TeamDisplayElement
 from src.external import utils
 
 class TeamAnalysisElement:

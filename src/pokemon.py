@@ -22,8 +22,8 @@ class Pokemon:
     def addMoveset(self, moveset):
         self.moveset = moveset
 
-    def addWildOccurrences(self, wild_occurrences):
-        self.wild_occurrences = wild_occurrences
+    def addWildOccurrences(self, *wild_occurrences):
+        self.wild_occurrences.extend(wild_occurrences)
 
     def __repr__(self):
         return f"Pokemon[{self.name}]"

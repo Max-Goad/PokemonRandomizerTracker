@@ -242,8 +242,15 @@ def main():
             wild_pokemon_occurrences = ingester.extractWildOccurrences()
             # Add wild occurrences to pokemon
             for pkmn in all_pokemon:
-                pkmn.addWildOccurrences(wild_pokemon_occurrences[pkmn.name])
+                pkmn.addWildOccurrences(*wild_pokemon_occurrences[pkmn.name])
             print(f"Extracted wild occurrences for {len(wild_pokemon_occurrences)} pokemon")
+
+            static_pokemon_occurrences = ingester.extractStaticOccurrences()
+            # Add static occurrences to pokemon
+            for pkmn in all_pokemon:
+                if pkmn.name in static_pokemon_occurrences:
+                    pkmn.addWildOccurrences(static_pokemon_occurrences[pkmn.name])
+            print(f"Extracted static occurrences for {len(static_pokemon_occurrences)} pokemon")
 
             # Update Team Builder Screen
             wrapper.main.team_analysis_element.update()
@@ -278,9 +285,6 @@ def main():
             currently_selected_pokemon = next((pkmn for pkmn in all_pokemon if pkmn.name == selected_name), None)
             assert currently_selected_pokemon is not None
             wrapper.main.pokemon_display_slb.update(currently_selected_pokemon)
-
-            # TEMP
-            pprint(currently_selected_pokemon.wild_occurrences)
 
         ################################################################################
         elif event in wrapper.main.pokemon_move_slb.eventKeys():

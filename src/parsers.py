@@ -14,6 +14,7 @@ class RandomizerLogParser(parsers.FileParser):
     POKEMON_MOVE_HEADER = r"Move Data"
     POKEMON_MOVESET_HEADER = r"Pokemon Movesets"
     WILD_POKEMON_HEADER = r"Wild Pokemon"
+    STATIC_POKEMON_HEADER = r"Static Pokemon"
 
     def __init__(self, file):
         super().__init__(file)
@@ -176,3 +177,27 @@ class RandomizerLogParser(parsers.FileParser):
             self.current_line += 1
 
         return wild_pkmn_occurrences
+
+    def extractStaticOccurrences(self):
+        # Move marker back to start
+        self.reset()
+
+        # Find start
+        self.moveAndGetGroups(self.STATIC_POKEMON_HEADER)
+
+        # Move past headers
+        self.current_line += 1
+
+        static_pkmn_occurrences = dict()
+
+        # Loop until empty line encountered
+        while True:
+            line = self.lines[self.current_line]
+            if not line.strip():
+                break
+
+            old, new = parsers.getGroups(r"(\w+) [=][>] (\w+)", line)
+            static_pkmn_occurrences[new] = pokemon.WildOccurrence(new, f"{old} (static)", [])
+            self.current_line += 1
+
+        return static_pkmn_occurrences

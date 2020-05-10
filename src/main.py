@@ -246,6 +246,7 @@ class RandomizerLogParser(FileParser):
     POKEMON_SUMMARY_HEADER = r"Pokemon Base Stats & Types"
     POKEMON_MOVE_HEADER = r"Move Data"
     POKEMON_MOVESET_HEADER = r"Pokemon Movesets"
+    WILD_POKEMON_HEADER = r"Wild Pokemon"
 
     def __init__(self, file):
         super().__init__(file)
@@ -359,6 +360,34 @@ class RandomizerLogParser(FileParser):
 
             self.current_line += 1
         return movesets
+
+    def extractWildPokemon(self):
+        # Move marker back to start
+        self.reset()
+
+        # Find start
+        self.moveAndGetGroups(self.WILD_POKEMON_HEADER)
+
+        # Move past headers
+        self.current_line += 1
+
+        wild_pokemon_locations = []
+
+        # Loop until empty line encountered
+        while True:
+            line = self.lines[self.current_line]
+            if not line.strip():
+                break
+
+            set_num, raw_location, raw_pokemon_list = line.split('-')
+            # Rate is currently unused
+            location_name, rate = getGroups(r"([\w\s?]+)[(]rate=(\d+)[)]", raw_location.strip())
+            raw_pokemon = raw_pokemon_list.split(',')
+
+            # TODO
+
+            self.current_line += 1
+        return wild_pokemon_locations
 
 ####################################################
 ## Global Defaults
@@ -891,6 +920,15 @@ class Pokemon:
                 ret_str += r"\n"
                 ret_str += f"{move_name} at level {level}"
             return ret_str
+
+    ####################################################
+    class Location:
+        def __init__(self, set_num, pkmn_name, level_min, level_max):
+            self.set_num = int(set_num)
+            self.pkmn_name = pkmn_name
+            self.level_min = level_min
+            self.level_max = level_max
+
 
 
 ####################################################

@@ -14,14 +14,27 @@ import statistics
 import typing
 import uuid
 
-from src import parsers, pokemon, types
+from src import sorters, parsers, pokemon, types
 from src.elements import PokemonDisplayElement, MoveElement, SearchableListBox, TeamDisplayElement, TeamAnalysisElement
 from src.external import utils
 
 ####################################################
-## Global Defaults
+## Globals / Defaults
 ####################################################
 default_browse_text = "X:/Games/Emulators/Pokemon Randomizer/roms/Pokemon Platinum Randomizer 2020.nds.log"
+all_pokemon = []
+all_moves = []
+
+
+def sortByOverall(pkmn_name):
+    [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
+    return sum([int(getattr(pkmn.stats, attr_name).value) for attr_name in pokemon.Stats.ALL_ATTR_NAMES])
+
+def sortByAttr(attr_name):
+    def innerSort(pkmn_name):
+        [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
+        return int(getattr(pkmn.stats, attr_name).value)
+    return innerSort
 
 ####################################################
 ## Reusable Containers
@@ -39,8 +52,17 @@ class MainWindowLayout:
         # Summary
         self.pokemon_display_slb = SearchableListBox(PokemonDisplayElement())
         self.display_add_to_team_builder_button = gui.Button("Add To Team Builder", key="pokemon_display_add_to_team_builder_button", metadata=self.pokemon_display_slb)
-        self.display_tab = gui.Tab("Display", [ [gui.Column(self.pokemon_display_slb.element.layout()), gui.Column([*self.pokemon_display_slb.layout(),
-                                                                                                                       [self.display_add_to_team_builder_button]], justification="right")],
+
+        self.display_slb_sorter = sorters.SLBSorter(self.pokemon_display_slb, "display_sorter")
+        overall_sort_button = self.display_slb_sorter.registerSort("Overall", sortByOverall)
+        attr_sort_buttons = {}
+        for attr_name in pokemon.Stats.ALL_ATTR_NAMES:
+            attr_sort_buttons[attr_name] = self.display_slb_sorter.registerSort(pokemon.Stats.short_name(attr_name), sortByAttr(attr_name))
+
+        self.display_tab = gui.Tab("Display", [ [gui.Column(self.pokemon_display_slb.element.layout()), gui.Column([ *self.pokemon_display_slb.layout(),
+                                                                                                                     [self.display_add_to_team_builder_button],
+                                                                                                                     [gui.Text("Sort By:"), overall_sort_button, *attr_sort_buttons.values()],
+                                                                                                                    ], justification="right")],
                                               ])
 
         # Moves
@@ -157,12 +179,13 @@ def popupStatAverages(all_pokemon: typing.List[pokemon.Pokemon]):
 def main():
     gui.theme("Topanga")
 
-    all_pokemon = []
+    global all_pokemon
     currently_selected_pokemon = None
     currently_selected_pokemon : pokemon.Pokemon
 
-    moves = []
+    global all_moves
     currently_selected_move = None
+    currently_selected_move : pokemon.Move
 
     movesets = []
 
@@ -228,8 +251,8 @@ def main():
             all_pokemon = ingester.extractPokemon()
             print(f"Extracted {len(all_pokemon)} pokemon")
 
-            moves = ingester.extractMoves()
-            print(f"Extracted {len(moves)} moves")
+            all_moves = ingester.extractMoves()
+            print(f"Extracted {len(all_moves)} moves")
 
             movesets = ingester.extractMovesets()
             # Add movesets to pokemon
@@ -261,7 +284,7 @@ def main():
 
             # Update combo boxs
             wrapper.main.pokemon_display_slb.populate([p.name for p in all_pokemon])
-            wrapper.main.pokemon_move_slb.populate([m.name for m in moves])
+            wrapper.main.pokemon_move_slb.populate([m.name for m in all_moves])
 
         ################################################################################
         elif event in wrapper.main.pokemon_display_slb.eventKeys():
@@ -295,7 +318,7 @@ def main():
             if event == wrapper.main.pokemon_move_slb.button.Key:
                 print("==== Event: Moves Chooser Button ====")
                 # Find closest match and update the selection
-                names = [move.name for move in moves]
+                names = [move.name for move in all_moves]
                 name_snippet = values[wrapper.main.pokemon_move_slb.input_text.Key]
                 [name_to_search] = difflib.get_close_matches(name_snippet, names, n=1, cutoff=0)
                 print(f"'{name_snippet}' found the match '{name_to_search}'")
@@ -304,7 +327,7 @@ def main():
                 print("==== Event: Moves Chooser Click ====")
 
             [selected_name] = wrapper.main.pokemon_move_slb.currentlySelected()
-            currently_selected_move = next((move for move in moves if move.name == selected_name), None)
+            currently_selected_move = next((move for move in all_moves if move.name == selected_name), None)
             assert currently_selected_move is not None
             wrapper.main.pokemon_move_slb.update(currently_selected_move)
 
@@ -370,6 +393,11 @@ def main():
                     break
             else:
                 print(f"Warning: {currently_selected_pokemon} cannot be added to Team Builder as the team is already full!")
+
+        elif event.startswith("display_sorter"):
+            print("=== Event: Sort Display ===")
+            sorter : sorters.SLBSorter = wrapper.window[event].metadata
+            sorter.sortBy(event)
 
         ################################################################################
         elif event.startswith("team_display_element_clear"):

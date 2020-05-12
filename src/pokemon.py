@@ -33,12 +33,35 @@ class Stats:
     ALL_ATTR_NAMES=("hp", "attack", "defence", "special_attack", "special_defence", "speed")
 
     def __init__(self, hp, p_atk, p_def, speed, s_atk, s_def):
-        self.hp = Stats.Attribute("hp", "hp", int(hp), maximum=255)
-        self.attack = Stats.Attribute("attack", "atk", int(p_atk), maximum=255)
-        self.defence = Stats.Attribute("defence", "def", int(p_def), maximum=255)
-        self.special_attack = Stats.Attribute("special_attack", "satk", int(s_atk), maximum=255)
-        self.special_defence = Stats.Attribute("special_defence", "sdef", int(s_def), maximum=255)
-        self.speed = Stats.Attribute("speed", "spd", int(speed), maximum=255)
+        self.hp = Stats.Attribute("hp", int(hp), maximum=255)
+        self.attack = Stats.Attribute("attack", int(p_atk), maximum=255)
+        self.defence = Stats.Attribute("defence", int(p_def), maximum=255)
+        self.special_attack = Stats.Attribute("special_attack", int(s_atk), maximum=255)
+        self.special_defence = Stats.Attribute("special_defence", int(s_def), maximum=255)
+        self.speed = Stats.Attribute("speed", int(speed), maximum=255)
+
+    @staticmethod
+    def short_name(attr_name):
+        if attr_name == "hp":
+            return "hp"
+        elif attr_name == "attack":
+            return "atk"
+        elif attr_name == "defence":
+            return "def"
+        elif attr_name == "special_attack":
+            return "stak"
+        elif attr_name == "special_defence":
+            return "sdef"
+        elif attr_name == "speed":
+            return "spd"
+        elif attr_name == "power":
+            return "pow"
+        elif attr_name == "accuracy":
+            return "acc"
+        elif attr_name == "pp":
+            return "pp"
+        else:
+            return None
 
     def __str__(self):
         return f"[{self.hp}, {self.attack}, {self.defence}, {self.special_attack}, {self.special_defence}, {self.speed}]"
@@ -47,10 +70,10 @@ class Stats:
     class Attribute:
         GRAPH_MAX=255
 
-        def __init__(self, name, short_name, value, maximum):
+        def __init__(self, name, value, maximum):
             assert value <= self.GRAPH_MAX, f"attribute value ({value}) must be <= {self.GRAPH_MAX}"
             self.name = name
-            self.short_name = short_name
+            self.short_name = Stats.short_name(name) or name
             self.value = value
             self.maximum = maximum
 
@@ -126,9 +149,9 @@ class Move:
         self.num = num
         self.name = name
         self.type = move_type
-        self.power = Stats.Attribute("power", "pow", int(power), maximum=150)
-        self.accuracy = Stats.Attribute("accuracy", "acc", int(accuracy), maximum=100)
-        self.pp = Stats.Attribute("pp", "pp", int(pp), maximum=40)
+        self.power = Stats.Attribute("power", int(power), maximum=150)
+        self.accuracy = Stats.Attribute("accuracy", int(accuracy), maximum=100)
+        self.pp = Stats.Attribute("pp", int(pp), maximum=40)
         self.category = category
 
 ####################################################

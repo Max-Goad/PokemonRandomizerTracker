@@ -14,7 +14,7 @@ import statistics
 import typing
 import uuid
 
-from src import sorters, parsers, pokemon, types
+from src import parsers, pokemon, types
 from src.elements import PokemonDisplayElement, MoveElement, SearchableListBox, TeamDisplayElement, TeamAnalysisElement
 from src.external import utils
 
@@ -60,16 +60,13 @@ class MainWindowLayout:
         self.pokemon_display_slb = SearchableListBox(PokemonDisplayElement())
         self.display_add_to_team_builder_button = gui.Button("Add To Team Builder", key="pokemon_display_add_to_team_builder_button", metadata=self.pokemon_display_slb)
 
-        self.display_slb_sorter = sorters.SLBSorter(self.pokemon_display_slb, "display_sorter")
-        clear_sort_button = self.display_slb_sorter.registerSort("Clear Sort/Filters", sortByNum)
-        overall_sort_button = self.display_slb_sorter.registerSort("Overall", sortByOverall)
-        attr_sort_buttons = {}
+        self.pokemon_display_slb.registerSort("Num", sortByNum)
+        self.pokemon_display_slb.registerSort("Overall", sortByOverall)
         for attr_name in pokemon.Stats.ALL_ATTR_NAMES:
-            attr_sort_buttons[attr_name] = self.display_slb_sorter.registerSort(pokemon.Stats.short_name(attr_name), sortByAttr(attr_name))
+            self.pokemon_display_slb.registerSort(pokemon.Stats.short_name(attr_name), sortByAttr(attr_name))
 
         self.display_tab = gui.Tab("Display", [ [gui.Column(self.pokemon_display_slb.element.layout()), gui.Column([ *self.pokemon_display_slb.layout(),
-                                                                                                                     [self.display_add_to_team_builder_button, clear_sort_button],
-                                                                                                                     [gui.Text("Sort By:"), overall_sort_button, *attr_sort_buttons.values()],
+                                                                                                                     [self.display_add_to_team_builder_button],
                                                                                                                     ], justification="right")],
                                               ])
 
@@ -403,10 +400,10 @@ def main():
                 print(f"Warning: {currently_selected_pokemon} cannot be added to Team Builder as the team is already full!")
 
         ################################################################################
-        elif event.startswith("display_sorter"):
+        elif event.startswith("SearchableListBox_SortButton"):
             print("=== Event: Sort Display ===")
-            sorter : sorters.SLBSorter = wrapper.window[event].metadata
-            sorter.sortBy(event)
+            sort_lambda = wrapper.window[event].metadata
+            sort_lambda()
 
         ################################################################################
         elif event.startswith("team_display_element_clear"):

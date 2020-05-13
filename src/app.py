@@ -43,6 +43,13 @@ def sortByAttr(attr_name):
         return theoretical_max - int(getattr(pkmn.stats, attr_name).value)
     return innerSort
 
+def filterByType(expected_type):
+    def innerFilter(pkmn_name):
+        [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
+        return pkmn.type.primary == expected_type or pkmn.type.secondary == expected_type
+    return innerFilter
+
+
 ####################################################
 ## Reusable Containers
 ####################################################
@@ -65,6 +72,9 @@ class MainWindowLayout:
         for attr_name in pokemon.Stats.ALL_ATTR_NAMES:
             self.pokemon_display_slb.registerSort(pokemon.Stats.short_name(attr_name), sortByAttr(attr_name))
 
+        for type_name in types.all_types:
+            self.pokemon_display_slb.registerFilter(type_name, filterByType(type_name))
+
         self.display_tab = gui.Tab("Display", [ [gui.Column(self.pokemon_display_slb.element.layout()), gui.Column([ *self.pokemon_display_slb.layout(),
                                                                                                                      [self.display_add_to_team_builder_button],
                                                                                                                     ], justification="right")],
@@ -72,7 +82,7 @@ class MainWindowLayout:
 
         # Moves
         self.pokemon_move_slb = SearchableListBox(MoveElement())
-        self.moves_tab = gui.Tab("Moves", [ [gui.Column(self.pokemon_move_slb.element.layout()), gui.Sizer(300, 0), gui.Column(self.pokemon_move_slb.layout())],
+        self.moves_tab = gui.Tab("Moves", [ [gui.Column(self.pokemon_move_slb.element.layout()), gui.Sizer(300, 0), gui.Column(self.pokemon_move_slb.layout(), justification="right")],
                                           ])
 
         # Team Builder
@@ -104,9 +114,14 @@ class MainWindowLayout:
     def layout(self):
         return [[self.tab_group]]
 
-    def populate_themes(self):
+    def populateThemes(self):
         self.theme_slb.populate(gui.theme_list())
 
+    def expandButtons(self):
+        # TODO: Can we do this is a more elegant way?
+        self.pokemon_display_slb.expandButtons()
+        self.pokemon_move_slb.expandButtons()
+        self.theme_slb.expandButtons()
 
 class WindowWrapper:
     def __init__(self, title, **kwargs):
@@ -119,7 +134,8 @@ class WindowWrapper:
     def new(self, location=(None, None)):
         self.main = MainWindowLayout(self)
         self.window = gui.Window(self.title, self.main.layout(), location=location, **self.kwargs)
-        self.main.populate_themes()
+        self.main.populateThemes()
+        self.main.expandButtons()
         # TEMP
         self.main.ingest_button.click()
 
@@ -401,9 +417,15 @@ def main():
 
         ################################################################################
         elif event.startswith("SearchableListBox_SortButton"):
-            print("=== Event: Sort Display ===")
+            print("=== Event: Sort Searchable List Box ===")
             sort_lambda = wrapper.window[event].metadata
             sort_lambda()
+
+        ################################################################################
+        elif event.startswith("SearchableListBox_FilterButton"):
+            print("=== Event: Filter Searchable List Box ===")
+            filter_lambda = wrapper.window[event].metadata
+            filter_lambda()
 
         ################################################################################
         elif event.startswith("team_display_element_clear"):

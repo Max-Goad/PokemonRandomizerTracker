@@ -5,12 +5,15 @@ class SearchableListBox:
     def __init__(self, element, size=(30,25)):
         self.uuid = uuid.uuid4().hex
         self.element = element
+        self.original_values = []
         self.list_box = gui.Listbox([], key=f"SearchableListBox_ListBox_{self.uuid}", size=size, font="Arial 16", enable_events=True, select_mode="single")
         self.input_text = gui.InputText(key=f"SearchableListBox_InputText_{self.uuid}", size=(22, 1), font="Arial 16")
         self.button = gui.Button("Search", key=f"SearchableListBox_Button_{self.uuid}", size=(8, 1), font="Arial 16")
         self.sort_buttons = []
+        self.filter_buttons = []
 
     def populate(self, values):
+        self.original_values = values
         self.list_box.update(values=values)
 
     def setSelection(self, name):
@@ -38,10 +41,34 @@ class SearchableListBox:
         self.sort_buttons.append(button)
         return button
 
+    def registerFilter(self, name, filter_lambda):
+        def createFilterLambda(filter_lambda):
+            def filt():
+                self.list_box.update(filter(filter_lambda, self.original_values))
+            return filt
+
+        if len(self.filter_buttons) == 0:
+            key = f"SearchableListBox_FilterButton_{len(self.filter_buttons)}_{self.uuid}"
+            self.filter_buttons.append(gui.Button("All", key=key, metadata=createFilterLambda(lambda x:x)))
+
+        key = f"SearchableListBox_FilterButton_{len(self.filter_buttons)}_{self.uuid}"
+        button = gui.Button(name.title(), key=key, metadata=createFilterLambda(filter_lambda))
+        self.filter_buttons.append(button)
+        return button
+
+    def expandButtons(self):
+        for button in self.sort_buttons:
+            button.expand(expand_x=True, expand_y=True)
+        for button in self.filter_buttons:
+            button.expand(expand_x=True, expand_y=True)
+
+
     def layout(self):
-        sort_line = [gui.Text("Sort By:"), *self.sort_buttons] if len(self.sort_buttons) > 0 else []
-        filter_line = []
-        return [[self.input_text, self.button],
-                [self.list_box],
-                sort_line,
-                filter_line]
+        layout = [gui.Column([  [self.input_text, self.button],
+                                [self.list_box],
+                             ])]
+        if len(self.sort_buttons) > 0:
+            layout.append(gui.Column([ [gui.Text("Sort By:")], *[[x] for x in self.sort_buttons]]))
+        if len(self.filter_buttons) > 0:
+            layout.append(gui.Column([ [gui.Text("Filter By:")], *[[x] for x in self.filter_buttons]]))
+        return [layout]

@@ -44,7 +44,7 @@ class SearchableListBox:
     def registerFilter(self, name, filter_lambda):
         def createFilterLambda(filter_lambda):
             def filt():
-                self.list_box.update(filter(filter_lambda, self.original_values))
+                self.list_box.update(list(filter(filter_lambda, self.original_values)))
             return filt
 
         if len(self.filter_buttons) == 0:

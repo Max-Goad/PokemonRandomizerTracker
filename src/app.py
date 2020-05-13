@@ -82,7 +82,7 @@ class MainWindowLayout:
 
         # Moves
         self.pokemon_move_slb = SearchableListBox(MoveElement())
-        self.moves_tab = gui.Tab("Moves", [ [gui.Column(self.pokemon_move_slb.element.layout()), gui.Sizer(300, 0), gui.Column(self.pokemon_move_slb.layout(), justification="right")],
+        self.moves_tab = gui.Tab("Moves", [ [gui.Column(self.pokemon_move_slb.element.layout()), gui.Sizer(500, 0), gui.Column(self.pokemon_move_slb.layout(), justification="right")],
                                           ])
 
         # Team Builder

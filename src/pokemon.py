@@ -33,12 +33,12 @@ class Stats:
     ALL_ATTR_NAMES=("hp", "attack", "defence", "special_attack", "special_defence", "speed")
 
     def __init__(self, hp, p_atk, p_def, speed, s_atk, s_def):
-        self.hp = Stats.Attribute("hp", int(hp), maximum=255)
-        self.attack = Stats.Attribute("attack", int(p_atk), maximum=255)
-        self.defence = Stats.Attribute("defence", int(p_def), maximum=255)
-        self.special_attack = Stats.Attribute("special_attack", int(s_atk), maximum=255)
-        self.special_defence = Stats.Attribute("special_defence", int(s_def), maximum=255)
-        self.speed = Stats.Attribute("speed", int(speed), maximum=255)
+        self.hp = Stats.Attribute("hp", int(hp), maximum=Stats.Attribute.ATTR_MAX)
+        self.attack = Stats.Attribute("attack", int(p_atk), maximum=Stats.Attribute.ATTR_MAX)
+        self.defence = Stats.Attribute("defence", int(p_def), maximum=Stats.Attribute.ATTR_MAX)
+        self.special_attack = Stats.Attribute("special_attack", int(s_atk), maximum=Stats.Attribute.ATTR_MAX)
+        self.special_defence = Stats.Attribute("special_defence", int(s_def), maximum=Stats.Attribute.ATTR_MAX)
+        self.speed = Stats.Attribute("speed", int(speed), maximum=Stats.Attribute.ATTR_MAX)
 
     @staticmethod
     def short_name(attr_name):
@@ -68,10 +68,10 @@ class Stats:
 
     ####################################################
     class Attribute:
-        GRAPH_MAX=255
+        ATTR_MAX=255
 
         def __init__(self, name, value, maximum):
-            assert value <= self.GRAPH_MAX, f"attribute value ({value}) must be <= {self.GRAPH_MAX}"
+            assert value <= self.ATTR_MAX, f"attribute value ({value}) must be <= {self.ATTR_MAX}"
             self.name = name
             self.short_name = Stats.short_name(name) or name
             self.value = value
@@ -79,18 +79,18 @@ class Stats:
 
         @staticmethod
         def createGraph(key=None):
-            return gui.Graph(canvas_size=(Stats.Attribute.GRAPH_MAX, 10), graph_bottom_left=(0,0), graph_top_right=(Stats.Attribute.GRAPH_MAX, 10), key=key)
+            return gui.Graph(canvas_size=(Stats.Attribute.ATTR_MAX, 10), graph_bottom_left=(0,0), graph_top_right=(Stats.Attribute.ATTR_MAX, 10), key=key)
 
         def drawOn(self, graph: gui.Graph):
             graph.erase()
-            scaled_value = (self.value*(self.GRAPH_MAX/self.maximum))
+            scaled_value = (self.value*(self.ATTR_MAX/self.maximum))
             graph.draw_rectangle((0, 10), (scaled_value, 0), fill_color=self._colour(scaled_value))
 
         def _colour(self, value):
             # We adjust the hue scale so it's 0.00 - ~0.72 instead of 0.00 - 1.00
             # This prevents us from having colour rollover, where really low and
             # really high values end up having similar colours.
-            h = value/(self.GRAPH_MAX + 100)
+            h = value/(self.ATTR_MAX + 100)
             s = 0.75
             v = 0.8
             final_hex = utils.hsv_to_hex(h, s, v)

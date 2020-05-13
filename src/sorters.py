@@ -20,4 +20,4 @@ class SLBSorter:
 
     def sortBy(self, key):
         sort_lambda = self.sort_lambdas[key]
-        self.slb.list_box.update(sorted(self.slb.list_box.Values, key=sort_lambda, reverse=True))
+        self.slb.list_box.update(sorted(self.slb.list_box.Values, key=sort_lambda))

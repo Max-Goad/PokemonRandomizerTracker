@@ -25,15 +25,22 @@ default_browse_text = "X:/Games/Emulators/Pokemon Randomizer/roms/Pokemon Platin
 all_pokemon = []
 all_moves = []
 
+def sortByNum(pkmn_name):
+    [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
+    return int(pkmn.num)
 
 def sortByOverall(pkmn_name):
     [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
-    return sum([int(getattr(pkmn.stats, attr_name).value) for attr_name in pokemon.Stats.ALL_ATTR_NAMES])
+    theoretical_max = (pokemon.Stats.Attribute.ATTR_MAX * len(pokemon.Stats.ALL_ATTR_NAMES))
+    # We subtract the actual from the theoretical max so the list is sorted in descending order
+    return theoretical_max - sum([int(getattr(pkmn.stats, attr_name).value) for attr_name in pokemon.Stats.ALL_ATTR_NAMES])
 
 def sortByAttr(attr_name):
     def innerSort(pkmn_name):
         [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
-        return int(getattr(pkmn.stats, attr_name).value)
+        theoretical_max = pokemon.Stats.Attribute.ATTR_MAX
+        # We subtract the actual from the theoretical max so the list is sorted in descending order
+        return theoretical_max - int(getattr(pkmn.stats, attr_name).value)
     return innerSort
 
 ####################################################
@@ -54,13 +61,14 @@ class MainWindowLayout:
         self.display_add_to_team_builder_button = gui.Button("Add To Team Builder", key="pokemon_display_add_to_team_builder_button", metadata=self.pokemon_display_slb)
 
         self.display_slb_sorter = sorters.SLBSorter(self.pokemon_display_slb, "display_sorter")
+        clear_sort_button = self.display_slb_sorter.registerSort("Clear Sort/Filters", sortByNum)
         overall_sort_button = self.display_slb_sorter.registerSort("Overall", sortByOverall)
         attr_sort_buttons = {}
         for attr_name in pokemon.Stats.ALL_ATTR_NAMES:
             attr_sort_buttons[attr_name] = self.display_slb_sorter.registerSort(pokemon.Stats.short_name(attr_name), sortByAttr(attr_name))
 
         self.display_tab = gui.Tab("Display", [ [gui.Column(self.pokemon_display_slb.element.layout()), gui.Column([ *self.pokemon_display_slb.layout(),
-                                                                                                                     [self.display_add_to_team_builder_button],
+                                                                                                                     [self.display_add_to_team_builder_button, clear_sort_button],
                                                                                                                      [gui.Text("Sort By:"), overall_sort_button, *attr_sort_buttons.values()],
                                                                                                                     ], justification="right")],
                                               ])
@@ -394,6 +402,7 @@ def main():
             else:
                 print(f"Warning: {currently_selected_pokemon} cannot be added to Team Builder as the team is already full!")
 
+        ################################################################################
         elif event.startswith("display_sorter"):
             print("=== Event: Sort Display ===")
             sorter : sorters.SLBSorter = wrapper.window[event].metadata

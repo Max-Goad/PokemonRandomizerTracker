@@ -10,9 +10,9 @@ class SearchableListBox:
         self.uuid = uuid.uuid4().hex
         self.element = element
         self.original_data = {}
-        self.list_box = gui.Listbox([], key=f"SearchableListBox_ListBox_{self.uuid}", size=size, font="Arial 16", enable_events=True, select_mode="single")
+        self.list_box = gui.Listbox([], key=f"SearchableListBox_ListBox_{self.uuid}_callback_available", size=size, font="Arial 16", enable_events=True, select_mode="single", metadata=self.onListSelection)
         self.input_text = gui.InputText(key=f"SearchableListBox_InputText_{self.uuid}", size=(22, 1), font="Arial 16")
-        self.button = gui.Button("Search", key=f"SearchableListBox_Button_{self.uuid}", size=(8, 1), font="Arial 16")
+        self.button = gui.Button("Search", key=f"SearchableListBox_Button_{self.uuid}_callback_available", size=(8, 1), font="Arial 16", metadata=self.onSearchButton)
         self.sort_buttons = []
         self.filter_buttons = []
 
@@ -50,7 +50,7 @@ class SearchableListBox:
         return (self.list_box.Key, self.button.Key)
 
     def registerSort(self, name, sort_lambda):
-        key = f"SearchableListBox_SortButton_{len(self.sort_buttons)}_{self.uuid}"
+        key = f"SearchableListBox_SortButton_{len(self.sort_buttons)}_{self.uuid}_callback_available"
         def createSortLambda(sort_lambda):
             def sort():
                 self.list_box.update(sorted(self.list_box.Values, key=sort_lambda))
@@ -67,10 +67,10 @@ class SearchableListBox:
             return filt
 
         if len(self.filter_buttons) == 0:
-            key = f"SearchableListBox_FilterButton_{len(self.filter_buttons)}_{self.uuid}"
+            key = f"SearchableListBox_FilterButton_{len(self.filter_buttons)}_{self.uuid}_callback_available"
             self.filter_buttons.append(gui.Button("All", key=key, metadata=createFilterLambda(lambda x:x)))
 
-        key = f"SearchableListBox_FilterButton_{len(self.filter_buttons)}_{self.uuid}"
+        key = f"SearchableListBox_FilterButton_{len(self.filter_buttons)}_{self.uuid}_callback_available"
         button = gui.Button(name.title(), key=key, metadata=createFilterLambda(filter_lambda))
         self.filter_buttons.append(button)
         return button

@@ -308,42 +308,8 @@ def main():
             wrapper.main.pokemon_move_slb.populate(all_moves)
 
         ################################################################################
-        elif event in wrapper.main.pokemon_display_slb.eventKeys():
-            if len(all_pokemon) == 0:
-                gui.popup_error("No Pokemon have been ingested")
-                continue
-
-            if event == wrapper.main.pokemon_display_slb.button.Key:
-                print("==== Event: Display Chooser Button ====")
-                wrapper.main.pokemon_display_slb.onSearchButton()
-            else:
-                print("==== Event: Display Chooser Click ====")
-                wrapper.main.pokemon_display_slb.onListSelection()
-
-
-        ################################################################################
-        elif event in wrapper.main.pokemon_move_slb.eventKeys():
-            if len(all_pokemon) == 0:
-                gui.popup_error("No Pokemon have been ingested")
-                continue
-
-            if event == wrapper.main.pokemon_move_slb.button.Key:
-                print("==== Event: Moves Chooser Button ====")
-                wrapper.main.pokemon_move_slb.onSearchButton()
-            else:
-                print("==== Event: Moves Chooser Click ====")
-                wrapper.main.pokemon_move_slb.onListSelection()
-
-
-        ################################################################################
-        elif event in wrapper.main.theme_slb.eventKeys():
-            # TODO: Fix copy-paste code!
-            if event == wrapper.main.theme_slb.button.Key:
-                print("==== Event: Theme Chooser Button ====")
-                wrapper.main.theme_slb.onSearchButton()
-            else:
-                print("==== Event: Theme Chooser Click ====")
-                wrapper.main.theme_slb.onListSelection()
+        elif event.endswith("_callback_available"):
+            wrapper.window[event].metadata()
 
         ################################################################################
         elif event in ("stat_averages",):
@@ -385,18 +351,6 @@ def main():
                     break
             else:
                 print(f"Warning: {currently_selected_pokemon} cannot be added to Team Builder as the team is already full!")
-
-        ################################################################################
-        elif event.startswith("SearchableListBox_SortButton"):
-            print("=== Event: Sort Searchable List Box ===")
-            sort_lambda = wrapper.window[event].metadata
-            sort_lambda()
-
-        ################################################################################
-        elif event.startswith("SearchableListBox_FilterButton"):
-            print("=== Event: Filter Searchable List Box ===")
-            filter_lambda = wrapper.window[event].metadata
-            filter_lambda()
 
         ################################################################################
         elif event.startswith("team_display_element_clear"):

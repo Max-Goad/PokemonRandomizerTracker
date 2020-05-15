@@ -1,3 +1,4 @@
+import difflib
 import PySimpleGUI as gui
 from   typing import Mapping, TypeVar
 import uuid
@@ -14,6 +15,21 @@ class SearchableListBox:
         self.button = gui.Button("Search", key=f"SearchableListBox_Button_{self.uuid}", size=(8, 1), font="Arial 16")
         self.sort_buttons = []
         self.filter_buttons = []
+
+    def onSearchButton(self):
+        snippet = self.input_text.get()
+        [closest_match] = difflib.get_close_matches(snippet, self.list_box.Values, n=1, cutoff=0) or [None]
+        if closest_match is None:
+            return
+        assert closest_match in self.original_data, f"{closest_match} not found in data passed to slb-{self.uuid}"
+        self.update(self.original_data[closest_match])
+
+    def onListSelection(self):
+        [selected] = self.currentlySelected()
+        if selected is None:
+            return
+        assert selected in self.original_data, f"{selected} not found in data passed to slb-{self.uuid}"
+        self.update(self.original_data[selected])
 
     def populate(self, data : Mapping[str, T]):
         self.original_data = data

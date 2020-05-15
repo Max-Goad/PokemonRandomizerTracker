@@ -315,18 +315,11 @@ def main():
 
             if event == wrapper.main.pokemon_display_slb.button.Key:
                 print("==== Event: Display Chooser Button ====")
-                # Find closest match and update the selection
-                name_snippet = values[wrapper.main.pokemon_display_slb.input_text.Key]
-                [name_to_search] = difflib.get_close_matches(name_snippet, wrapper.main.pokemon_display_slb.list_box.Values, n=1, cutoff=0)
-                print(f"'{name_snippet}' found the match '{name_to_search}'")
-                wrapper.main.pokemon_display_slb.setSelection(name_to_search)
+                wrapper.main.pokemon_display_slb.onSearchButton()
             else:
                 print("==== Event: Display Chooser Click ====")
+                wrapper.main.pokemon_display_slb.onListSelection()
 
-            [selected_name] = wrapper.main.pokemon_display_slb.currentlySelected()
-            print(selected_name)
-            assert selected_name in all_pokemon, f"{selected_name} isn't an ingested pokemon"
-            wrapper.main.pokemon_display_slb.update(all_pokemon[selected_name])
 
         ################################################################################
         elif event in wrapper.main.pokemon_move_slb.eventKeys():
@@ -336,34 +329,21 @@ def main():
 
             if event == wrapper.main.pokemon_move_slb.button.Key:
                 print("==== Event: Moves Chooser Button ====")
-                # Find closest match and update the selection
-                name_snippet = values[wrapper.main.pokemon_move_slb.input_text.Key]
-                [name_to_search] = difflib.get_close_matches(name_snippet, wrapper.main.pokemon_move_slb.list_box.Values, n=1, cutoff=0)
-                print(f"'{name_snippet}' found the match '{name_to_search}'")
-                wrapper.main.pokemon_move_slb.setSelection(name_to_search)
+                wrapper.main.pokemon_move_slb.onSearchButton()
             else:
                 print("==== Event: Moves Chooser Click ====")
+                wrapper.main.pokemon_move_slb.onListSelection()
 
-            [selected_name] = wrapper.main.pokemon_move_slb.currentlySelected()
-            assert selected_name in all_moves, f"{selected_name} isn't an ingested move"
-            wrapper.main.pokemon_move_slb.update(all_moves[selected_name])
 
         ################################################################################
         elif event in wrapper.main.theme_slb.eventKeys():
             # TODO: Fix copy-paste code!
             if event == wrapper.main.theme_slb.button.Key:
                 print("==== Event: Theme Chooser Button ====")
-                # Find closest match and update the selection
-                names = gui.theme_list()
-                name_snippet = values[wrapper.main.theme_slb.input_text.Key]
-                [name_to_search] = difflib.get_close_matches(name_snippet, names, n=1, cutoff=0)
-                print(f"'{name_snippet}' found the match '{name_to_search}'")
-                wrapper.main.theme_slb.setSelection(name_to_search)
+                wrapper.main.theme_slb.onSearchButton()
             else:
                 print("==== Event: Theme Chooser Click ====")
-
-            [selected_name] = wrapper.main.theme_slb.currentlySelected()
-            wrapper.main.theme_slb.update(selected_name)
+                wrapper.main.theme_slb.onListSelection()
 
         ################################################################################
         elif event in ("stat_averages",):

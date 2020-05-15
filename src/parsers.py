@@ -42,7 +42,7 @@ class RandomizerLogParser(parsers.FileParser):
         # Move past headers
         self.current_line += 2
 
-        extracted_pkmn = []
+        extracted_pkmn = {}
 
         # Loop until empty line encountered
         while True:
@@ -61,7 +61,8 @@ class RandomizerLogParser(parsers.FileParser):
             abilities = [a for a in pkmn_pieces[9:11] if a != '-']
             items = [i for i in pkmn_pieces[11].split(",") if i]
 
-            extracted_pkmn.append(pokemon.Pokemon(num, name, types, stats, abilities, items))
+            new_pkmn = pokemon.Pokemon(num, name, types, stats, abilities, items)
+            extracted_pkmn[new_pkmn.name] = new_pkmn
             self.current_line += 1
         return extracted_pkmn
 
@@ -75,7 +76,7 @@ class RandomizerLogParser(parsers.FileParser):
         # Move past headers
         self.current_line += 2
 
-        moves = []
+        extracted_moves = {}
 
         # Loop until empty line encountered
         while True:
@@ -92,9 +93,11 @@ class RandomizerLogParser(parsers.FileParser):
             # but we can't name an image '???.png' so we use 'unknown.png' instead.
             if move_type == "???":
                 move_type = "unknown"
-            moves.append(pokemon.Move(num, name, pokemon.Type([move_type]), power, accuracy, pp, pokemon.Type([category])))
+
+            new_move = pokemon.Move(num, name, pokemon.Type([move_type]), power, accuracy, pp, pokemon.Type([category]))
+            extracted_moves[new_move.name] = new_move
             self.current_line += 1
-        return moves
+        return extracted_moves
 
     def extractMovesets(self):
         # Move marker back to start

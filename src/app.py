@@ -11,41 +11,43 @@ import re as regex
 from   scipy.signal import savgol_filter
 from   scipy import interpolate, optimize, stats
 import statistics
-import typing
+from   typing import Mapping, List
 import uuid
 
 from src import parsers, pokemon, types
 from src.elements import PokemonDisplayElement, MoveElement, SearchableListBox, TeamDisplayElement, TeamAnalysisElement
 from src.external import utils
+from src.pokemon import Pokemon
 
 ####################################################
 ## Globals / Defaults
 ####################################################
 default_browse_text = "X:/Games/Emulators/Pokemon Randomizer/roms/Pokemon Platinum Randomizer 2020.nds.log"
-all_pokemon = []
-all_moves = []
+all_pokemon : Mapping[str, Pokemon] = {}
+all_moves : Mapping[str, pokemon.Move]= {}
 
 def sortByNum(pkmn_name):
-    [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
-    return int(pkmn.num)
+    assert pkmn_name in all_pokemon, f"can't find {pkmn_name} in ingested pokemon"
+    return int(all_pokemon[pkmn_name].num)
 
 def sortByOverall(pkmn_name):
-    [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
+    assert pkmn_name in all_pokemon, f"can't find {pkmn_name} in ingested pokemon"
     theoretical_max = (pokemon.Stats.Attribute.ATTR_MAX * len(pokemon.Stats.ALL_ATTR_NAMES))
     # We subtract the actual from the theoretical max so the list is sorted in descending order
-    return theoretical_max - sum([int(getattr(pkmn.stats, attr_name).value) for attr_name in pokemon.Stats.ALL_ATTR_NAMES])
+    return theoretical_max - sum([int(getattr(all_pokemon[pkmn_name].stats, attr_name).value) for attr_name in pokemon.Stats.ALL_ATTR_NAMES])
 
 def sortByAttr(attr_name):
     def innerSort(pkmn_name):
-        [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
+        assert pkmn_name in all_pokemon, f"can't find {pkmn_name} in ingested pokemon"
         theoretical_max = pokemon.Stats.Attribute.ATTR_MAX
         # We subtract the actual from the theoretical max so the list is sorted in descending order
-        return theoretical_max - int(getattr(pkmn.stats, attr_name).value)
+        return theoretical_max - int(getattr(all_pokemon[pkmn_name].stats, attr_name).value)
     return innerSort
 
 def filterByType(expected_type):
     def innerFilter(pkmn_name):
-        [pkmn] = [p for p in all_pokemon if p.name == pkmn_name]
+        assert pkmn_name in all_pokemon, f"can't find {pkmn_name} in ingested pokemon"
+        pkmn = all_pokemon[pkmn_name]
         return pkmn.type.primary == expected_type or pkmn.type.secondary == expected_type
     return innerFilter
 
@@ -160,10 +162,10 @@ class ThemeChangingElement:
 ####################################################
 ## Other (Temp?)
 ####################################################
-def popupStatAverages(all_pokemon: typing.List[pokemon.Pokemon]):
+def popupStatAverages(all_pokemon: List[pokemon.Pokemon]):
     # Group raw stats by attribute
     grouped_raw_stats = {}
-    grouped_raw_stats : typing.Dict[str, int]
+    grouped_raw_stats : Mapping[str, int]
     for attr_name in pokemon.Stats.ALL_ATTR_NAMES:
         grouped_raw_stats[attr_name] = []
         for pkmn in all_pokemon:
@@ -171,7 +173,7 @@ def popupStatAverages(all_pokemon: typing.List[pokemon.Pokemon]):
 
     # Covert raw counts into Counter objects
     grouped_counters = {}
-    grouped_counters : typing.Dict[str, collections.Counter]
+    grouped_counters : Mapping[str, collections.Counter]
     for attr_name in pokemon.Stats.ALL_ATTR_NAMES:
         grouped_counters[attr_name] = collections.Counter(grouped_raw_stats[attr_name])
 
@@ -201,12 +203,10 @@ def main():
     gui.theme("Topanga")
 
     global all_pokemon
-    currently_selected_pokemon = None
-    currently_selected_pokemon : pokemon.Pokemon
+    currently_selected_pokemon : pokemon.Pokemon = None
 
     global all_moves
-    currently_selected_move = None
-    currently_selected_move : pokemon.Move
+    currently_selected_move : pokemon.Move = None
 
     movesets = []
 
@@ -278,20 +278,18 @@ def main():
             movesets = ingester.extractMovesets()
             # Add movesets to pokemon
             for moveset in movesets:
-                for pkmn in all_pokemon:
-                    if moveset.pkmn_name == pkmn.name:
-                        pkmn.addMoveset(moveset)
+                all_pokemon[moveset.pkmn_name].addMoveset(moveset)
             print(f"Extracted movesets for {len(movesets)} pokemon")
 
             wild_pokemon_occurrences = ingester.extractWildOccurrences()
             # Add wild occurrences to pokemon
-            for pkmn in all_pokemon:
+            for pkmn in all_pokemon.values():
                 pkmn.addWildOccurrences(*wild_pokemon_occurrences[pkmn.name])
             print(f"Extracted wild occurrences for {len(wild_pokemon_occurrences)} pokemon")
 
             static_pokemon_occurrences = ingester.extractStaticOccurrences()
             # Add static occurrences to pokemon
-            for pkmn in all_pokemon:
+            for pkmn in all_pokemon.values():
                 if pkmn.name in static_pokemon_occurrences:
                     pkmn.addWildOccurrences(static_pokemon_occurrences[pkmn.name])
             print(f"Extracted static occurrences for {len(static_pokemon_occurrences)} pokemon")
@@ -304,8 +302,8 @@ def main():
             wrapper.window['text_ingested_boolean'].update(file_ingested)
 
             # Update combo boxs
-            wrapper.main.pokemon_display_slb.populate([p.name for p in all_pokemon])
-            wrapper.main.pokemon_move_slb.populate([m.name for m in all_moves])
+            wrapper.main.pokemon_display_slb.populate(list(all_pokemon.keys()))
+            wrapper.main.pokemon_move_slb.populate(list(all_moves.keys()))
 
         ################################################################################
         elif event in wrapper.main.pokemon_display_slb.eventKeys():
@@ -316,9 +314,8 @@ def main():
             if event == wrapper.main.pokemon_display_slb.button.Key:
                 print("==== Event: Display Chooser Button ====")
                 # Find closest match and update the selection
-                names = [pkmn.name for pkmn in all_pokemon]
                 name_snippet = values[wrapper.main.pokemon_display_slb.input_text.Key]
-                [name_to_search] = difflib.get_close_matches(name_snippet, names, n=1, cutoff=0)
+                [name_to_search] = difflib.get_close_matches(name_snippet, wrapper.main.pokemon_display_slb.list_box.Values, n=1, cutoff=0)
                 print(f"'{name_snippet}' found the match '{name_to_search}'")
                 wrapper.main.pokemon_display_slb.setSelection(name_to_search)
             else:
@@ -326,9 +323,8 @@ def main():
 
             [selected_name] = wrapper.main.pokemon_display_slb.currentlySelected()
             print(selected_name)
-            currently_selected_pokemon = next((pkmn for pkmn in all_pokemon if pkmn.name == selected_name), None)
-            assert currently_selected_pokemon is not None
-            wrapper.main.pokemon_display_slb.update(currently_selected_pokemon)
+            assert selected_name in all_pokemon
+            wrapper.main.pokemon_display_slb.update(all_pokemon[selected_name])
 
         ################################################################################
         elif event in wrapper.main.pokemon_move_slb.eventKeys():
@@ -348,9 +344,8 @@ def main():
                 print("==== Event: Moves Chooser Click ====")
 
             [selected_name] = wrapper.main.pokemon_move_slb.currentlySelected()
-            currently_selected_move = next((move for move in all_moves if move.name == selected_name), None)
-            assert currently_selected_move is not None
-            wrapper.main.pokemon_move_slb.update(currently_selected_move)
+            assert selected_name in all_moves
+            wrapper.main.pokemon_move_slb.update(all_moves[selected_name])
 
         ################################################################################
         elif event in wrapper.main.theme_slb.eventKeys():
@@ -369,11 +364,6 @@ def main():
             [selected_name] = wrapper.main.theme_slb.currentlySelected()
             wrapper.main.theme_slb.update(selected_name)
 
-            #[selected_name] = pokemon_display_slb.currentlySelected()
-            #currently_selected_pokemon = next((pkmn for pkmn in all_pokemon if pkmn.name == selected_name), None)
-            #assert currently_selected_pokemon is not None
-            #pokemon_display_slb.update(currently_selected_pokemon)
-
         ################################################################################
         elif event in ("stat_averages",):
             print("==== Event: Stat Averages ====")
@@ -381,7 +371,7 @@ def main():
                 gui.popup_error("No Pokemon have been ingested")
                 continue
 
-            popupStatAverages(all_pokemon)
+            popupStatAverages(all_pokemon.values())
 
         ################################################################################
         elif event in ("listbox_theme",):
@@ -404,8 +394,8 @@ def main():
             print("=== Event: Add Pokemon To Team Builder ===")
             display_slb : SearchableListBox = wrapper.window[event].metadata
             [selected_name] = display_slb.currentlySelected()
-            currently_selected_pokemon : pokemon.Pokemon = next((pkmn for pkmn in all_pokemon if pkmn.name == selected_name), None)
-            assert currently_selected_pokemon is not None
+            assert selected_name in all_pokemon
+            currently_selected_pokemon : pokemon.Pokemon = all_pokemon[selected_name]
 
             for team_builder_element in wrapper.main.team_builder_elements:
                 if team_builder_element.empty:
@@ -437,9 +427,8 @@ def main():
         elif event.startswith("team_display_element_title"):
             print("=== Event: Clear Team Display ===")
             selected_name = wrapper.window[event].DisplayText
-            currently_selected_pokemon : pokemon.Pokemon = next((pkmn for pkmn in all_pokemon if pkmn.name == selected_name), None)
-            assert currently_selected_pokemon is not None
-            wrapper.main.pokemon_display_slb.update(currently_selected_pokemon)
+            assert selected_name in all_pokemon
+            wrapper.main.pokemon_display_slb.update(all_pokemon[selected_name])
 
             # Finally, switch tabs to the Display tab
             wrapper.main.display_tab.select()
@@ -452,7 +441,7 @@ def main():
                 continue
 
             for elem in wrapper.main.team_builder_elements:
-                elem.update(all_pokemon[random.randint(0,len(all_pokemon)-1)])
+                elem.update(list(all_pokemon.values())[random.randint(0,len(all_pokemon)-1)])
 
         ################################################################################
         elif event in ("team_builder_randomize_remaining_button"):
@@ -463,7 +452,7 @@ def main():
 
             for elem in wrapper.main.team_builder_elements:
                 if elem.empty:
-                    elem.update(all_pokemon[random.randint(0,len(all_pokemon)-1)])
+                    elem.update(list(all_pokemon.values())[random.randint(0,len(all_pokemon)-1)])
 
         ################################################################################
         elif event in ("team_builder_clear_team_button"):

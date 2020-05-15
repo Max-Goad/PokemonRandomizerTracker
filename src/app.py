@@ -117,7 +117,9 @@ class MainWindowLayout:
         return [[self.tab_group]]
 
     def populateThemes(self):
-        self.theme_slb.populate(gui.theme_list())
+        # SearchableListBoxes require a mapping of keys and values, so when the keys
+        # ARE the values, we just convert the list [x,y] to a mapping of {x:x, y:y}.
+        self.theme_slb.populate({x:x for x in gui.theme_list()})
 
     def expandButtons(self):
         # TODO: Can we do this is a more elegant way?
@@ -302,8 +304,8 @@ def main():
             wrapper.window['text_ingested_boolean'].update(file_ingested)
 
             # Update combo boxs
-            wrapper.main.pokemon_display_slb.populate(list(all_pokemon.keys()))
-            wrapper.main.pokemon_move_slb.populate(list(all_moves.keys()))
+            wrapper.main.pokemon_display_slb.populate(all_pokemon)
+            wrapper.main.pokemon_move_slb.populate(all_moves)
 
         ################################################################################
         elif event in wrapper.main.pokemon_display_slb.eventKeys():
@@ -323,7 +325,7 @@ def main():
 
             [selected_name] = wrapper.main.pokemon_display_slb.currentlySelected()
             print(selected_name)
-            assert selected_name in all_pokemon
+            assert selected_name in all_pokemon, f"{selected_name} isn't an ingested pokemon"
             wrapper.main.pokemon_display_slb.update(all_pokemon[selected_name])
 
         ################################################################################
@@ -335,16 +337,15 @@ def main():
             if event == wrapper.main.pokemon_move_slb.button.Key:
                 print("==== Event: Moves Chooser Button ====")
                 # Find closest match and update the selection
-                names = [move.name for move in all_moves]
                 name_snippet = values[wrapper.main.pokemon_move_slb.input_text.Key]
-                [name_to_search] = difflib.get_close_matches(name_snippet, names, n=1, cutoff=0)
+                [name_to_search] = difflib.get_close_matches(name_snippet, wrapper.main.pokemon_move_slb.list_box.Values, n=1, cutoff=0)
                 print(f"'{name_snippet}' found the match '{name_to_search}'")
                 wrapper.main.pokemon_move_slb.setSelection(name_to_search)
             else:
                 print("==== Event: Moves Chooser Click ====")
 
             [selected_name] = wrapper.main.pokemon_move_slb.currentlySelected()
-            assert selected_name in all_moves
+            assert selected_name in all_moves, f"{selected_name} isn't an ingested move"
             wrapper.main.pokemon_move_slb.update(all_moves[selected_name])
 
         ################################################################################

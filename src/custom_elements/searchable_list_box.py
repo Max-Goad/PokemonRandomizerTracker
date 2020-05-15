@@ -1,20 +1,23 @@
 import PySimpleGUI as gui
+from   typing import Mapping, TypeVar
 import uuid
+
+T = TypeVar('T')
 
 class SearchableListBox:
     def __init__(self, element, size=(30,25)):
         self.uuid = uuid.uuid4().hex
         self.element = element
-        self.original_values = []
+        self.original_data = {}
         self.list_box = gui.Listbox([], key=f"SearchableListBox_ListBox_{self.uuid}", size=size, font="Arial 16", enable_events=True, select_mode="single")
         self.input_text = gui.InputText(key=f"SearchableListBox_InputText_{self.uuid}", size=(22, 1), font="Arial 16")
         self.button = gui.Button("Search", key=f"SearchableListBox_Button_{self.uuid}", size=(8, 1), font="Arial 16")
         self.sort_buttons = []
         self.filter_buttons = []
 
-    def populate(self, values):
-        self.original_values = values
-        self.list_box.update(values=values)
+    def populate(self, data : Mapping[str, T]):
+        self.original_data = data
+        self.list_box.update(values=list(data.keys()))
 
     def setSelection(self, name):
         name_index = self.list_box.get_list_values().index(name)
@@ -25,7 +28,7 @@ class SearchableListBox:
         self.element.update(values)
 
     def currentlySelected(self):
-        return self.list_box.get()
+        return self.list_box.get() or [None]
 
     def eventKeys(self):
         return (self.list_box.Key, self.button.Key)
@@ -44,7 +47,7 @@ class SearchableListBox:
     def registerFilter(self, name, filter_lambda):
         def createFilterLambda(filter_lambda):
             def filt():
-                self.list_box.update(list(filter(filter_lambda, self.original_values)))
+                self.list_box.update(list(filter(filter_lambda, list(self.original_data.keys()))))
             return filt
 
         if len(self.filter_buttons) == 0:

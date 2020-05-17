@@ -15,7 +15,7 @@ from   typing import Mapping, List
 import uuid
 
 from src import parsers, pokemon, types
-from src.elements import PokemonDisplayElement, MoveElement, SearchableListBox, TeamDisplayElement, TeamAnalysisElement
+from src.elements import PokemonDisplayElement, MoveElement, SearchableListBox, TeamDisplayElement, TeamAnalysisElement, LocationElement
 from src.external import utils
 from src.pokemon import Pokemon
 
@@ -88,6 +88,11 @@ class MainWindowLayout:
         self.moves_tab = gui.Tab("Moves", [ [gui.Column(self.pokemon_move_slb.element.layout()), gui.Sizer(500, 0), gui.Column(self.pokemon_move_slb.layout(), justification="right")],
                                           ])
 
+        # Locations
+        self.location_slb = SearchableListBox(LocationElement())
+        self.locations_tab = gui.Tab("Locations", [ [gui.Column(self.location_slb.element.layout()), gui.Sizer(690, 0), gui.Column(self.location_slb.layout(), justification="right")],
+                                                  ])
+
         # Team Builder
         self.team_builder_elements = [TeamDisplayElement(i) for i in range(6)]
         self.team_analysis_element = TeamAnalysisElement(self.team_builder_elements)
@@ -110,7 +115,7 @@ class MainWindowLayout:
                                               ]
                                             , element_justification="right")
 
-        self.tab_group = gui.TabGroup([[self.home_tab, self.display_tab, self.moves_tab, self.team_builder_tab, self.options_tab]]
+        self.tab_group = gui.TabGroup([[self.home_tab, self.display_tab, self.moves_tab, self.locations_tab, self.team_builder_tab, self.options_tab]]
                                     , key=f"main_window_layout_tab_group_{uuid.uuid4().hex}"
                                     , font="Impact 12")
 
@@ -316,6 +321,7 @@ def main():
             # Update combo boxs
             wrapper.main.pokemon_display_slb.populate(all_pokemon)
             wrapper.main.pokemon_move_slb.populate(all_moves)
+            wrapper.main.location_slb.populate(all_locations)
 
         ################################################################################
         elif event.endswith("_callback_available"):

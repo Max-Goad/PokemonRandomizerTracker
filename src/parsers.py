@@ -190,7 +190,7 @@ class RandomizerLogParser(parsers.FileParser):
 
             self.current_line += 1
 
-        return locations
+        return dict(sorted(locations.items()))
 
     def extractStaticOccurrences(self):
         # Move marker back to start

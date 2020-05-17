@@ -24,7 +24,8 @@ from src.pokemon import Pokemon
 ####################################################
 default_browse_text = "X:/Games/Emulators/Pokemon Randomizer/roms/Pokemon Platinum Randomizer 2020.nds.log"
 all_pokemon : Mapping[str, Pokemon] = {}
-all_moves : Mapping[str, pokemon.Move]= {}
+all_moves : Mapping[str, pokemon.Move] = {}
+all_locations : Mapping[str, pokemon.Location] = {}
 
 def sortByNum(pkmn_name):
     assert pkmn_name in all_pokemon, f"can't find {pkmn_name} in ingested pokemon"
@@ -205,10 +206,8 @@ def main():
     gui.theme("Topanga")
 
     global all_pokemon
-    currently_selected_pokemon : pokemon.Pokemon = None
-
     global all_moves
-    currently_selected_move : pokemon.Move = None
+    global all_locations
 
     movesets = []
 
@@ -283,11 +282,22 @@ def main():
                 all_pokemon[moveset.pkmn_name].addMoveset(moveset)
             print(f"Extracted movesets for {len(movesets)} pokemon")
 
-            wild_pokemon_occurrences = ingester.extractWildOccurrences()
+            all_locations = ingester.extractLocations()
+            print(f"Extracted {len(all_locations)} locations")
+
             # Add wild occurrences to pokemon
+            # 1) Extract occurrences into map of [pkmn_name, wo]
+            wild_occurrences : Mapping[str, List[pokemon.WildOccurrence]] = collections.defaultdict(list)
+            wo_counter = 0
+            for location in all_locations.values():
+                for sublocation in location.sublocations:
+                    for wild_occurrence in sublocation.wild_occurrences:
+                        wild_occurrences[wild_occurrence.pkmn_name] += [wild_occurrence]
+                        wo_counter += 1
+            # 2) Apply all wild occurrences to list of all pokemon
             for pkmn in all_pokemon.values():
-                pkmn.addWildOccurrences(*wild_pokemon_occurrences[pkmn.name])
-            print(f"Extracted wild occurrences for {len(wild_pokemon_occurrences)} pokemon")
+                pkmn.addWildOccurrences(*wild_occurrences[pkmn.name])
+            print(f"Applied {wo_counter} wild occurrences to {len(all_pokemon)} pokemon")
 
             static_pokemon_occurrences = ingester.extractStaticOccurrences()
             # Add static occurrences to pokemon
@@ -394,8 +404,6 @@ def main():
             print("=== Event: Clear Team ===")
             for elem in wrapper.main.team_builder_elements:
                 elem.clear()
-
-
 
         ################################################################################
         elif event.startswith("explanation_button_"):

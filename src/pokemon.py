@@ -1,4 +1,4 @@
-import typing
+from   typing import List
 import PySimpleGUI as gui
 
 from src import types
@@ -17,7 +17,7 @@ class Pokemon:
         self.items = items
         self.moves = {}
         self.moveset = []
-        self.wild_occurrences : typing.List[WildOccurrence] = []
+        self.wild_occurrences : List[WildOccurrence] = []
 
     def addMoveset(self, moveset):
         self.moveset = moveset
@@ -171,14 +171,6 @@ class Moveset:
         return ret_str
 
 ####################################################
-class Location:
-    def __init__(self, set_num, pkmn_name, level_min, level_max):
-        self.set_num = int(set_num)
-        self.pkmn_name = pkmn_name
-        self.level_min = level_min
-        self.level_max = level_max
-
-####################################################
 class WildOccurrence:
     def __init__(self, pkmn_name, location, levels):
         self.pkmn_name = pkmn_name
@@ -202,3 +194,27 @@ class WildOccurrence:
 
     def __repr__(self):
         return f"Wild Pokemon Occurrence[{self.pkmn_name},{self.location},{self.levels}]"
+
+
+####################################################
+class Location:
+    def __init__(self, name):
+        self.name = name
+        self.sublocations = []
+
+    def __repr__(self):
+        return f"Location[{self.name}]"
+
+class Sublocation:
+    @staticmethod
+    def classifications():
+        return ["Surfing", "Old Rod", "Good Rod", "Super Rod", "Grass/Cave", "Swarm/Radar/GBA"]
+
+    def __init__(self, set_num, location_name, classification):
+        self.set_num = set_num
+        self.location_name = location_name
+        self.classification = classification
+        self.wild_occurrences = []
+
+    def displayName(self):
+        return f"{self.location_name} ({self.classification})"

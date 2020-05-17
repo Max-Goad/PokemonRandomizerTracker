@@ -1,7 +1,7 @@
 import collections
 import itertools
 import pprint
-import typing
+from   typing import Mapping, List
 
 from src import pokemon
 from src.external import parsers, utils
@@ -13,6 +13,7 @@ class RandomizerLogParser(parsers.FileParser):
     POKEMON_DISPLAY_HEADER = r"Pokemon Base Stats & Types"
     POKEMON_MOVE_HEADER = r"Move Data"
     POKEMON_MOVESET_HEADER = r"Pokemon Movesets"
+    LOCATION_HEADER = r"Wild Pokemon"
     WILD_POKEMON_HEADER = r"Wild Pokemon"
     STATIC_POKEMON_HEADER = r"Static Pokemon"
 
@@ -130,7 +131,7 @@ class RandomizerLogParser(parsers.FileParser):
             self.current_line += 1
         return movesets
 
-    def extractWildOccurrences(self):
+    def extractLocations(self):
         # Move marker back to start
         self.reset()
 
@@ -140,7 +141,7 @@ class RandomizerLogParser(parsers.FileParser):
         # Move past headers
         self.current_line += 1
 
-        wild_pkmn_occurrences = collections.defaultdict(list)
+        locations : Mapping[str, pokemon.Location] = {}
 
         # Loop until empty line encountered
         while True:
@@ -151,11 +152,21 @@ class RandomizerLogParser(parsers.FileParser):
             # set_num is currently unused
             set_num, raw_location, raw_pkmn_list = line.split(' - ')
             # rate is currently unused
-            location_name, rate = parsers.getGroups(r"(.+)[(]rate=(\d+)[)]", raw_location.strip())
-            location_name = location_name.strip()
-            raw_pkmn = raw_pkmn_list.split(',')
+            raw_location_name, rate = parsers.getGroups(r"(.+)[(]rate=(\d+)[)]", raw_location.strip())
+
+            # seperate the actual name from the classification
+            location_regex = fr"\s*(.+)\s+({'|'.join(pokemon.Sublocation.classifications())})"
+            location_name, location_classification = parsers.getGroups(location_regex, raw_location_name.strip())
+
+            if location_name not in locations:
+                locations[location_name] = pokemon.Location(location_name)
+
+            # create a sublocation instance
+            sl = pokemon.Sublocation(set_num, location_name, location_classification)
+            locations[location_name].sublocations.append(sl)
 
             # Extract mapping from list of raw pokemon/level pairs
+            raw_pkmn = raw_pkmn_list.split(',')
             pkmn_level_mapping = collections.defaultdict(set)
             for raw in raw_pkmn:
                 # Pokemon Level Mappings can come in 2 forms:
@@ -175,11 +186,11 @@ class RandomizerLogParser(parsers.FileParser):
                     pkmn_level_mapping[pkmn_name].add(int(level.strip()))
 
             for pkmn_name, levels in pkmn_level_mapping.items():
-                wild_pkmn_occurrences[pkmn_name].append(pokemon.WildOccurrence(pkmn_name, location_name, levels))
+                sl.wild_occurrences.append(pokemon.WildOccurrence(pkmn_name, sl, levels))
 
             self.current_line += 1
 
-        return wild_pkmn_occurrences
+        return locations
 
     def extractStaticOccurrences(self):
         # Move marker back to start

@@ -1,54 +1,46 @@
 import collections
-import difflib
-import gzip
-from   matplotlib import pyplot
-import numpy
 import pathlib
 from   pprint import pprint
-import PySimpleGUI as gui
 import random
-import re as regex
-from   scipy.signal import savgol_filter
-from   scipy import interpolate, optimize, stats
 import statistics
 from   typing import Mapping, List
 import uuid
 
-from src import parsers, pokemon, types
+from   matplotlib import pyplot
+import numpy
+import PySimpleGUI as gui
+from   scipy import interpolate
+
+from src import database, parsers, pokemon, types
 from src.elements import PokemonDisplayElement, MoveElement, SearchableListBox, TeamDisplayElement, TeamAnalysisElement, LocationElement
-from src.external import utils
 from src.pokemon import Pokemon
 
 ####################################################
 ## Globals / Defaults
 ####################################################
-default_browse_text = "X:/Games/Emulators/Pokemon Randomizer/roms/Pokemon Platinum Randomizer 2020.nds.log"
-all_pokemon : Mapping[str, Pokemon] = {}
-all_moves : Mapping[str, pokemon.Move] = {}
-all_locations : Mapping[str, pokemon.Location] = {}
 
 def sortByNum(pkmn_name):
-    assert pkmn_name in all_pokemon, f"can't find {pkmn_name} in ingested pokemon"
-    return int(all_pokemon[pkmn_name].num)
+    assert pkmn_name in database.instance.pokemon, f"can't find {pkmn_name} in ingested pokemon"
+    return int(database.instance.pokemon[pkmn_name].num)
 
 def sortByOverall(pkmn_name):
-    assert pkmn_name in all_pokemon, f"can't find {pkmn_name} in ingested pokemon"
+    assert pkmn_name in database.instance.pokemon, f"can't find {pkmn_name} in ingested pokemon"
     theoretical_max = (pokemon.Stats.Attribute.ATTR_MAX * len(pokemon.Stats.ALL_ATTR_NAMES))
     # We subtract the actual from the theoretical max so the list is sorted in descending order
-    return theoretical_max - sum([int(getattr(all_pokemon[pkmn_name].stats, attr_name).value) for attr_name in pokemon.Stats.ALL_ATTR_NAMES])
+    return theoretical_max - sum([int(getattr(database.instance.pokemon[pkmn_name].stats, attr_name).value) for attr_name in pokemon.Stats.ALL_ATTR_NAMES])
 
 def sortByAttr(attr_name):
     def innerSort(pkmn_name):
-        assert pkmn_name in all_pokemon, f"can't find {pkmn_name} in ingested pokemon"
+        assert pkmn_name in database.instance.pokemon, f"can't find {pkmn_name} in ingested pokemon"
         theoretical_max = pokemon.Stats.Attribute.ATTR_MAX
         # We subtract the actual from the theoretical max so the list is sorted in descending order
-        return theoretical_max - int(getattr(all_pokemon[pkmn_name].stats, attr_name).value)
+        return theoretical_max - int(getattr(database.instance.pokemon[pkmn_name].stats, attr_name).value)
     return innerSort
 
 def filterByType(expected_type):
     def innerFilter(pkmn_name):
-        assert pkmn_name in all_pokemon, f"can't find {pkmn_name} in ingested pokemon"
-        pkmn = all_pokemon[pkmn_name]
+        assert pkmn_name in database.instance.pokemon, f"can't find {pkmn_name} in ingested pokemon"
+        pkmn = database.instance.pokemon[pkmn_name]
         return pkmn.type.primary == expected_type or pkmn.type.secondary == expected_type
     return innerFilter
 
@@ -61,7 +53,7 @@ class MainWindowLayout:
         # Home
         self.file_ingested = False
         self.ingest_button = gui.Button("Ingest", key="button_ingest")
-        self.home_tab = gui.Tab("Home", [ [gui.InputText(key="input_text_file", default_text=default_browse_text), gui.FileBrowse(button_text="Browse For Log File")] ,
+        self.home_tab = gui.Tab("Home", [ [gui.InputText(key="input_text_file", default_text=database.default_source_location), gui.FileBrowse(button_text="Browse For Log File")] ,
                                           [self.ingest_button, gui.Text(self.file_ingested, key="text_ingested_boolean")],
                                           [gui.Button("Stat Averages", key="stat_averages"), gui.Button("Close"), gui.Button("???")],
                                         ])
@@ -208,14 +200,7 @@ def popupStatAverages(all_pokemon: List[pokemon.Pokemon]):
 
 
 def main():
-    gui.theme("Topanga")
-
-    global all_pokemon
-    global all_moves
-    global all_locations
-
-    movesets = []
-
+    gui.theme(database.default_theme)
 
     # Define window and layout
     wrapper = WindowWrapper("My Test Application", return_keyboard_events=True, use_default_focus=False, finalize=True)
@@ -275,41 +260,29 @@ def main():
                 gui.popup_error("Ingested file doesn't have a valid format!")
                 continue
 
-            all_pokemon = ingester.extractPokemon()
-            print(f"Extracted {len(all_pokemon)} pokemon")
+            # TODO: Ingester should just return list
+            database.instance.addPokemon(list(ingester.extractPokemon().values()))
+            # TODO: Move prints into ingester
+            print(f"Extracted {len(database.instance.pokemon)} pokemon")
 
-            all_moves = ingester.extractMoves()
-            print(f"Extracted {len(all_moves)} moves")
+            # TODO: Ingester should just return list
+            database.instance.addMoves(list(ingester.extractMoves().values()))
+            # TODO: Move prints into ingester
+            print(f"Extracted {len(database.instance.moves)} moves")
 
             movesets = ingester.extractMovesets()
-            # Add movesets to pokemon
-            for moveset in movesets:
-                all_pokemon[moveset.pkmn_name].addMoveset(moveset)
+            database.instance.addMovesets(movesets)
             print(f"Extracted movesets for {len(movesets)} pokemon")
 
-            all_locations = ingester.extractLocations()
-            print(f"Extracted {len(all_locations)} locations")
+            # TODO: Ingester should just return list
+            database.instance.addLocations(list(ingester.extractLocations().values()))
+            print(f"Extracted {len(database.instance.locations)} locations")
 
             # Add wild occurrences to pokemon
-            # 1) Extract occurrences into map of [pkmn_name, wo]
-            wild_occurrences : Mapping[str, List[pokemon.WildOccurrence]] = collections.defaultdict(list)
-            wo_counter = 0
-            for location in all_locations.values():
-                for sublocation in location.sublocations:
-                    for wild_occurrence in sublocation.wild_occurrences:
-                        wild_occurrences[wild_occurrence.pkmn_name] += [wild_occurrence]
-                        wo_counter += 1
-            # 2) Apply all wild occurrences to list of all pokemon
-            for pkmn in all_pokemon.values():
-                pkmn.addWildOccurrences(*wild_occurrences[pkmn.name])
-            print(f"Applied {wo_counter} wild occurrences to {len(all_pokemon)} pokemon")
+            database.instance.addWildOccurrencesToPokemon()
 
-            static_pokemon_occurrences = ingester.extractStaticOccurrences()
-            # Add static occurrences to pokemon
-            for pkmn in all_pokemon.values():
-                if pkmn.name in static_pokemon_occurrences:
-                    pkmn.addWildOccurrences(static_pokemon_occurrences[pkmn.name])
-            print(f"Extracted static occurrences for {len(static_pokemon_occurrences)} pokemon")
+            # Add static encounters to pokemon
+            database.instance.addStaticPokemonEncounters(ingester.extractStaticOccurrences())
 
             # Update Team Builder Screen
             wrapper.main.team_analysis_element.update()
@@ -319,9 +292,9 @@ def main():
             wrapper.window['text_ingested_boolean'].update(file_ingested)
 
             # Update combo boxs
-            wrapper.main.pokemon_display_slb.populate(all_pokemon)
-            wrapper.main.pokemon_move_slb.populate(all_moves)
-            wrapper.main.location_slb.populate(all_locations)
+            wrapper.main.pokemon_display_slb.populate(database.instance.pokemon)
+            wrapper.main.pokemon_move_slb.populate(database.instance.moves)
+            wrapper.main.location_slb.populate(database.instance.locations)
 
         ################################################################################
         elif event.endswith("_callback_available"):
@@ -330,11 +303,11 @@ def main():
         ################################################################################
         elif event in ("stat_averages",):
             print("==== Event: Stat Averages ====")
-            if len(all_pokemon) == 0:
+            if len(database.instance.pokemon) == 0:
                 gui.popup_error("No Pokemon have been ingested")
                 continue
 
-            popupStatAverages(all_pokemon.values())
+            popupStatAverages(database.instance.pokemon.values())
 
         ################################################################################
         elif event in ("listbox_theme",):
@@ -357,8 +330,8 @@ def main():
             print("=== Event: Add Pokemon To Team Builder ===")
             display_slb : SearchableListBox = wrapper.window[event].metadata
             [selected_name] = display_slb.currentlySelected()
-            assert selected_name in all_pokemon
-            currently_selected_pokemon : pokemon.Pokemon = all_pokemon[selected_name]
+            assert selected_name in database.instance.pokemon
+            currently_selected_pokemon : pokemon.Pokemon = database.instance.pokemon[selected_name]
 
             for team_builder_element in wrapper.main.team_builder_elements:
                 if team_builder_element.empty:
@@ -378,8 +351,8 @@ def main():
         elif event.startswith("team_display_element_title"):
             print("=== Event: Clear Team Display ===")
             selected_name = wrapper.window[event].DisplayText
-            assert selected_name in all_pokemon
-            wrapper.main.pokemon_display_slb.update(all_pokemon[selected_name])
+            assert selected_name in database.instance.pokemon
+            wrapper.main.pokemon_display_slb.update(database.instance.pokemon[selected_name])
 
             # Finally, switch tabs to the Display tab
             wrapper.main.display_tab.select()
@@ -387,23 +360,23 @@ def main():
         ################################################################################
         elif event in ("team_builder_randomize_team_button"):
             print("=== Event: Randomize Team ===")
-            if len(all_pokemon) == 0:
+            if len(database.instance.pokemon) == 0:
                 gui.popup_error("No Pokemon have been ingested")
                 continue
 
             for elem in wrapper.main.team_builder_elements:
-                elem.update(list(all_pokemon.values())[random.randint(0,len(all_pokemon)-1)])
+                elem.update(list(database.instance.pokemon.values())[random.randint(0,len(database.instance.pokemon)-1)])
 
         ################################################################################
         elif event in ("team_builder_randomize_remaining_button"):
             print("=== Event: Randomize Remaining ===")
-            if len(all_pokemon) == 0:
+            if len(database.instance.pokemon) == 0:
                 gui.popup_error("No Pokemon have been ingested")
                 continue
 
             for elem in wrapper.main.team_builder_elements:
                 if elem.empty:
-                    elem.update(list(all_pokemon.values())[random.randint(0,len(all_pokemon)-1)])
+                    elem.update(list(database.instance.pokemon.values())[random.randint(0,len(database.instance.pokemon)-1)])
 
         ################################################################################
         elif event in ("team_builder_clear_team_button"):

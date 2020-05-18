@@ -1,12 +1,15 @@
 import difflib
-import PySimpleGUI as gui
 from   typing import Mapping, TypeVar
 import uuid
 
+import PySimpleGUI as gui
+
+from src.element import Element
+
 T = TypeVar('T')
 
-class SearchableListBox:
-    def __init__(self, element, size=(30,25)):
+class SearchableListBox(Element):
+    def __init__(self, element : Element, size=(30,25)):
         self.uuid = uuid.uuid4().hex
         self.element = element
         self.original_data = {}
@@ -39,9 +42,9 @@ class SearchableListBox:
         name_index = self.list_box.get_list_values().index(name)
         self.list_box.update(set_to_index=name_index, scroll_to_index=name_index)
 
-    def update(self, values):
+    def update(self, obj):
         self.input_text.update("")
-        self.element.update(values)
+        self.element.update(obj)
 
     def currentlySelected(self):
         return self.list_box.get() or [None]

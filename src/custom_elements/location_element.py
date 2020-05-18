@@ -3,10 +3,10 @@ import PySimpleGUI as gui
 from   typing import Mapping, List
 import uuid
 
-from src import pokemon
+from src import element, pokemon
 from src.external import utils
 
-class SublocationDisplayElement:
+class SublocationDisplayElement(element.Element):
     def __init__(self):
         self.uuid = uuid.uuid4().hex
         self.set_num_element = gui.Text("", size=(8, 1))
@@ -24,7 +24,7 @@ class SublocationDisplayElement:
     def layout(self):
         return [self.set_num_element, self.wild_occurrences_element]
 
-class LocationElement:
+class LocationElement(element.Element):
     def __init__(self):
         self.uuid = uuid.uuid4().hex
         self.title = gui.Text(f"", key=f"location_element_title_{self.uuid}", size=(25, 1), font="Impact 20")

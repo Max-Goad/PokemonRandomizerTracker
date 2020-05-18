@@ -1,9 +1,9 @@
 import PySimpleGUI as gui
 import uuid
 
-from src import pokemon
+from src import element, pokemon
 
-class MoveElement:
+class MoveElement(element.Element):
     def __init__(self):
         self.uuid = uuid.uuid4().hex
         self.title = gui.Text(f"", key=f"move_element_title_{self.uuid}", size=(13, 1), font="Impact 20")

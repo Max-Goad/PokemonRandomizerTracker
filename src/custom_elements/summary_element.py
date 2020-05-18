@@ -1,42 +1,44 @@
-import PySimpleGUI as gui
 import uuid
 
+import PySimpleGUI as gui
+
 from src import pokemon
+from src.element import Element
 from src.external.parsers import getGroups
 
-class PokemonDisplayElement:
+class SummaryElement(Element):
     def __init__(self):
         self.uuid = uuid.uuid4().hex
         # Header
-        self.title = gui.Text(f"", key=f"pokemon_display_element_title_{self.uuid}", size=(13, 1), font="Impact 20")
-        self.primary_type_button = pokemon.Type.createButton(f"pokemon_display_element_type_primary_{self.uuid}")
-        self.secondary_type_button = pokemon.Type.createButton(f"pokemon_display_element_type_secondary_{self.uuid}")
+        self.title = gui.Text(f"", key=f"summary_element_title_{self.uuid}", size=(13, 1), font="Impact 20")
+        self.primary_type_button = pokemon.Type.createButton(f"summary_element_type_primary_{self.uuid}")
+        self.secondary_type_button = pokemon.Type.createButton(f"summary_element_type_secondary_{self.uuid}")
         # Attributes
         self.attribute_rows = {}
         for attr_name in pokemon.Stats.ALL_ATTR_NAMES:
-            self.attribute_rows[attr_name] = [gui.Text("", key=f"pokemon_display_element_attribute_name_{attr_name}_{self.uuid}", size=(12, 1)), gui.Text("", key=f"pokemon_display_element_attribute_value_{attr_name}_{self.uuid}", size=(3, 1)), pokemon.Stats.Attribute.createGraph(f"pokemon_display_element_attribute_bar_{attr_name}_{self.uuid}")]
+            self.attribute_rows[attr_name] = [gui.Text("", key=f"summary_element_attribute_name_{attr_name}_{self.uuid}", size=(12, 1)), gui.Text("", key=f"summary_element_attribute_value_{attr_name}_{self.uuid}", size=(3, 1)), pokemon.Stats.Attribute.createGraph(f"summary_element_attribute_bar_{attr_name}_{self.uuid}")]
         # Held Items
-        self.held_items_title_text = gui.Text(f"", key=f"pokemon_display_element_held_items_title_{self.uuid}", size=(10,1), font="Arial 16")
+        self.held_items_title_text = gui.Text(f"", key=f"summary_element_held_items_title_{self.uuid}", size=(10,1), font="Arial 16")
         self.held_items_rows = []
         for i in range(3):
             # One text for the item (which is clickable!), and one for the occurrence rate
-            self.held_items_rows.append((gui.Text(f"", key=f"pokemon_display_element_held_items_name_{i}_{self.uuid}", size=(15,1), font="Consolas 12", enable_events=True),
-                                         gui.Text(f"", key=f"pokemon_display_element_held_items_rate_{i}_{self.uuid}", size=(7,1), font="Consolas 12")))
+            self.held_items_rows.append((gui.Text(f"", key=f"summary_element_held_items_name_{i}_{self.uuid}", size=(15,1), font="Consolas 12", enable_events=True),
+                                         gui.Text(f"", key=f"summary_element_held_items_rate_{i}_{self.uuid}", size=(7,1), font="Consolas 12")))
 
         # Moveset
-        self.moveset_title_text = gui.Text(f"", key=f"pokemon_display_element_moveset_title_{self.uuid}", size=(8,1), font="Arial 14")
+        self.moveset_title_text = gui.Text(f"", key=f"summary_element_moveset_title_{self.uuid}", size=(8,1), font="Arial 14")
         self.moveset_rows = []
         for i in range(20):
             # One text for the level ("Level 50 - "), and one for the actual move name (which is clickable!)
-            self.moveset_rows.append((gui.Text(f"", key=f"pokemon_display_element_moveset_level_{i}_{self.uuid}", size=(10,1), font="Consolas 10"),
-                                      gui.Text(f"", key=f"pokemon_display_element_moveset_move_name_{i}_{self.uuid}", size=(40,1), font="Consolas 10", enable_events=True)))
+            self.moveset_rows.append((gui.Text(f"", key=f"summary_element_moveset_level_{i}_{self.uuid}", size=(10,1), font="Consolas 10"),
+                                      gui.Text(f"", key=f"summary_element_moveset_move_name_{i}_{self.uuid}", size=(40,1), font="Consolas 10", enable_events=True)))
         # Wild Occurrences
-        self.wild_occurrence_title_text = gui.Text(f"", key=f"pokemon_display_element_wild_occurrence_title_{self.uuid}", size=(8,1), font="Arial 14")
+        self.wild_occurrence_title_text = gui.Text(f"", key=f"summary_element_wild_occurrence_title_{self.uuid}", size=(8,1), font="Arial 14")
         self.wild_occurrence_rows = []
         for i in range(10):
             # One text for the location (which is clickable!), and one for the levels
-            self.wild_occurrence_rows.append((gui.Text(f"", key=f"pokemon_display_element_wild_occurrence_location_{i}_{self.uuid}", size=(30,1), font="Consolas 10", enable_events=True),
-                                               gui.Text(f"", key=f"pokemon_display_element_wild_occurrence_levels_{i}_{self.uuid}", size=(20,1), font="Consolas 10")))
+            self.wild_occurrence_rows.append((gui.Text(f"", key=f"summary_element_wild_occurrence_location_{i}_{self.uuid}", size=(30,1), font="Consolas 10", enable_events=True),
+                                               gui.Text(f"", key=f"summary_element_wild_occurrence_levels_{i}_{self.uuid}", size=(20,1), font="Consolas 10")))
 
     def update(self, pkmn : pokemon.Pokemon):
         # Header

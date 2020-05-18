@@ -1,18 +1,20 @@
 from   functools import reduce
-import PySimpleGUI as gui
 import typing
 import uuid
 
+import PySimpleGUI as gui
+
 from src import pokemon, types
-from src.custom_elements.team_display import TeamDisplayElement
+from src.element import Element
+from src.custom_elements.team_display_element import TeamDisplayElement
 from src.external import utils
 
-class TeamAnalysisElement:
+class TeamAnalysisElement(Element):
     def __init__(self, team_elements : typing.List[TeamDisplayElement]):
         self.uuid = uuid.uuid4().hex
         self.team_elements = team_elements
         for element in self.team_elements:
-            element.on_update = lambda: self.update()
+            element.on_update = self.update
 
         wex = """\
 "Weaknesses" indicate types that, on average, are more effective against your team as a whole.

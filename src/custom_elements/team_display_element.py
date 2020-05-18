@@ -1,10 +1,11 @@
-import PySimpleGUI as gui
-import typing
 import uuid
 
-from src import pokemon
+import PySimpleGUI as gui
 
-class TeamDisplayElement:
+from src import pokemon
+from src.element import Element
+
+class TeamDisplayElement(Element):
     def __init__(self, index):
         self.uuid = uuid.uuid4().hex
         self.index = index

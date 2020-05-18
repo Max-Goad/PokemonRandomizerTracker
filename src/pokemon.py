@@ -1,3 +1,4 @@
+import collections
 from   typing import List
 import PySimpleGUI as gui
 
@@ -200,7 +201,7 @@ class WildOccurrence:
 class Location:
     def __init__(self, name):
         self.name = name
-        self.sublocations = []
+        self.sublocations = set()
 
     def __repr__(self):
         return f"Location[{self.name}]"
@@ -218,3 +219,12 @@ class Sublocation:
 
     def displayName(self):
         return f"{self.location_name} ({self.classification})"
+
+    def __eq__(self, other):
+        return (self.set_num, self.location_name, self.classification) == (other.set_num, other.location_name, other.classification)
+
+    def __hash__(self):
+        return hash((self.set_num, self.location_name, self.classification))
+
+    def __repr__(self):
+        return f"Sublocation[{self.set_num}, {self.location_name}, {self.classification}]"

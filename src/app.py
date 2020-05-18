@@ -90,7 +90,7 @@ class MainWindowLayout:
 
         # Locations
         self.location_slb = SearchableListBox(LocationElement())
-        self.locations_tab = gui.Tab("Locations", [ [gui.Column(self.location_slb.element.layout()), gui.Sizer(690, 0), gui.Column(self.location_slb.layout(), justification="right")],
+        self.locations_tab = gui.Tab("Locations", [ [gui.Column(self.location_slb.element.layout()), gui.Sizer(10, 0), gui.Column(self.location_slb.layout(), justification="right")],
                                                   ])
 
         # Team Builder

@@ -131,7 +131,7 @@ class RandomizerLogParser(parsers.FileParser):
             self.current_line += 1
         return movesets
 
-    def extractLocations(self):
+    def extractLocations(self) -> Mapping[str, pokemon.Location]:
         # Move marker back to start
         self.reset()
 
@@ -163,7 +163,7 @@ class RandomizerLogParser(parsers.FileParser):
 
             # create a sublocation instance
             sl = pokemon.Sublocation(set_num, location_name, location_classification)
-            locations[location_name].sublocations.append(sl)
+            locations[location_name].sublocations.add(sl)
 
             # Extract mapping from list of raw pokemon/level pairs
             raw_pkmn = raw_pkmn_list.split(',')
@@ -189,6 +189,8 @@ class RandomizerLogParser(parsers.FileParser):
                 sl.wild_occurrences.append(pokemon.WildOccurrence(pkmn_name, sl, levels))
 
             self.current_line += 1
+
+        del locations["? Unknown ?"]
 
         return dict(sorted(locations.items()))
 

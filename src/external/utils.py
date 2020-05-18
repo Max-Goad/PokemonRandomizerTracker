@@ -22,6 +22,9 @@ def halve(l):
     half = len(l)//2
     return l[:half], l[half:]
 
+def listify(l):
+    return [[x] for x in l]
+
 def rgb_to_hex(r, g, b):
     """Converts from three rgb
     numbers to their hex representations.

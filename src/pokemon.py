@@ -213,7 +213,11 @@ class Location:
 class Sublocation:
     @staticmethod
     def classifications():
-        return ["Surfing", "Old Rod", "Good Rod", "Super Rod", "Grass/Cave", "Swarm/Radar/GBA"]
+        return [# Platinum
+                "Surfing", "Old Rod", "Good Rod", "Super Rod", "Grass/Cave", "Swarm/Radar/GBA",
+                # White/Black
+                "Surfing Spots", "Fishing", "Fishing Spots", "Shaking Spots", "Doubles Grass"
+               ]
 
     def __init__(self, set_num, location_name, classification):
         self.set_num = set_num

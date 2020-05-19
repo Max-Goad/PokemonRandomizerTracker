@@ -57,7 +57,7 @@ class SummaryElement(Element):
         self.held_items_title_text.update("Held Items:")
         for i, (name_elem, rate_elem) in enumerate(self.held_items_rows):
             if i < len(pkmn.items):
-                item_name, item_rate = getGroups(r"(.+) [(]([\w\d%]+)[)]", pkmn.items[i].strip())
+                item_name, item_rate = getGroups(r"(.+) [(](.+)[)]", pkmn.items[i].strip())
                 name_elem.update(item_name)
                 rate_elem.update(item_rate)
             else:

@@ -53,14 +53,20 @@ class RandomizerLogParser(parsers.FileParser):
 
             pkmn_pieces = [x.strip() for x in line.split("|")]
 
-            assert len(pkmn_pieces) == 12, f"Expected(12) vs Actual({len(pkmn_pieces)})"
+
+            if len(pkmn_pieces) == 12:
+                num_abilities = 2
+            elif len(pkmn_pieces) == 13:
+                num_abilities = 3
+            else:
+                assert len(pkmn_pieces) in (12,13), f"Expected(12/13) vs Actual({len(pkmn_pieces)})"
 
             num = pkmn_pieces[0]
             name = pokemon.fix_unicode_name(pkmn_pieces[1])
             types = pkmn_pieces[2].split("/")
             stats = pkmn_pieces[3:9]
-            abilities = [a for a in pkmn_pieces[9:11] if a != '-']
-            items = [i for i in pkmn_pieces[11].split(",") if i]
+            abilities = [a for a in pkmn_pieces[9:9+num_abilities] if a != '-']
+            items = [i for i in pkmn_pieces[9+num_abilities].split(",") if i]
 
             new_pkmn = pokemon.Pokemon(num, name, types, stats, abilities, items)
             extracted_pkmn[new_pkmn.name] = new_pkmn
@@ -190,7 +196,10 @@ class RandomizerLogParser(parsers.FileParser):
 
             self.current_line += 1
 
-        del locations["? Unknown ?"]
+        # Platinum has these unknown locations for some reason
+        # We have to get rid of them or they muck up the data.
+        if "? Unknown ?" in locations:
+            del locations["? Unknown ?"]
 
         return dict(sorted(locations.items()))
 
@@ -212,7 +221,9 @@ class RandomizerLogParser(parsers.FileParser):
             if not line.strip():
                 break
 
-            old, new = parsers.getGroups(r"(\w+) [=][>] (\w+)", line)
+            # old_num is to differentiate between different occurrences of the same static pokemon.
+            # It is currently unused.
+            old, old_num, new = parsers.getGroups(r"(\w+)([(]\d[)])? [=][>] (\w+)", line)
             static_pkmn_occurrences[new] = pokemon.WildOccurrence(new, pokemon.StaticSublocation(old), [])
             self.current_line += 1
 

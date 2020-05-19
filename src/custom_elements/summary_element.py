@@ -80,7 +80,7 @@ class SummaryElement(Element):
         for i in range(len(self.wild_occurrence_rows)):
             if i < len(pkmn.wild_occurrences):
                 wo = pkmn.wild_occurrences[i]
-                self.wild_occurrence_rows[i][0].update(wo.location.displayName())
+                self.wild_occurrence_rows[i][0].update(wo.displayName())
                 self.wild_occurrence_rows[i][1].update(wo.condensedLevelStr())
             else:
                 self.wild_occurrence_rows[i][0].update("")

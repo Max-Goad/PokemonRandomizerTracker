@@ -1,3 +1,4 @@
+import abc
 import collections
 from   typing import List
 import PySimpleGUI as gui
@@ -178,6 +179,9 @@ class WildOccurrence:
         self.location = location
         self.levels = levels
 
+    def displayName(self) -> str:
+        return self.location.displayName()
+
     def condensedLevelStr(self) -> str:
         # Original: [0,1,2,3,4,5,6,7,8,9,10,15,20,21,22,23,24,25]
         level_ranges_step1 = utils.to_ranges(self.levels)
@@ -228,3 +232,10 @@ class Sublocation:
 
     def __repr__(self):
         return f"Sublocation[{self.set_num}, {self.location_name}, {self.classification}]"
+
+class StaticSublocation(Sublocation):
+    def __init__(self, pkmn_name):
+        self.pkmn_name = pkmn_name
+
+    def displayName(self):
+        return f"{self.pkmn_name} (static)"

@@ -213,7 +213,7 @@ class RandomizerLogParser(parsers.FileParser):
                 break
 
             old, new = parsers.getGroups(r"(\w+) [=][>] (\w+)", line)
-            static_pkmn_occurrences[new] = pokemon.WildOccurrence(new, f"{old} (static)", [])
+            static_pkmn_occurrences[new] = pokemon.WildOccurrence(new, pokemon.StaticSublocation(old), [])
             self.current_line += 1
 
         return static_pkmn_occurrences

@@ -25,6 +25,7 @@ class SearchableListBox(Element):
         if closest_match is None:
             return
         assert closest_match in self.original_data, f"{closest_match} not found in data passed to slb-{self.uuid}"
+        self.setSelection(closest_match)
         self.update(self.original_data[closest_match])
 
     def onListSelection(self):

@@ -178,7 +178,7 @@ def main():
             print("=== Event: Add Pokemon To Team Builder ===")
             display_slb : SearchableListBox = controller.instance.window[event].metadata
             [selected_name] = display_slb.currentlySelected()
-            assert selected_name in database.instance.pokemon
+            assert selected_name in database.instance.pokemon, f"{selected_name} not in {len(database.instance.pokemon)} pokemon"
             currently_selected_pokemon : pokemon.Pokemon = database.instance.pokemon[selected_name]
 
             for team_builder_element in controller.instance.current_element.team_builder_elements:

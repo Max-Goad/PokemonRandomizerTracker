@@ -1,10 +1,10 @@
-import collections
-import PySimpleGUI as gui
 from   typing import Mapping, List
 import uuid
 
+import PySimpleGUI as gui
+
 from src import element, pokemon
-from src.external import utils
+
 
 class SublocationDisplayElement(element.Element):
     def __init__(self):
@@ -31,8 +31,8 @@ class LocationElement(element.Element):
         self.tab_elements : Mapping[str, List[SublocationDisplayElement]] = {}
         self.tabs : Mapping[str, gui.Tab] = {}
         for classification in pokemon.Sublocation.classifications():
-            self.tab_elements[classification] = [SublocationDisplayElement() for i in range(20)]
-            self.tabs[classification] = gui.Tab(classification, [slde.layout() for slde in self.tab_elements[classification]])
+            self.tab_elements[classification] = [SublocationDisplayElement() for i in range(35)]
+            self.tabs[classification] = gui.Tab(classification, [[gui.Column([slde.layout() for slde in self.tab_elements[classification]], scrollable=True, vertical_scroll_only=True)]])
 
     def update(self, location : pokemon.Location):
         self.title.update(f"{location.name}")
@@ -54,9 +54,6 @@ class LocationElement(element.Element):
             while slde is not None:
                 slde.clear()
                 slde = next(it, None)
-
-
-
 
     def layout(self):
         return  [ [self.title],

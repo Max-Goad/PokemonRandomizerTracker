@@ -1,4 +1,4 @@
-from   typing import Mapping, List
+from   typing import Mapping, List, Set
 import uuid
 
 import PySimpleGUI as gui
@@ -36,6 +36,7 @@ class LocationElement(element.Element):
 
     def update(self, location : pokemon.Location):
         self.title.update(f"{location.name}")
+        self.set_tab_visibility({sl.classification for sl in location.sublocations})
         iter_mapping = self.tab_element_iterators()
         for sl in sorted(location.sublocations):
             element_to_fill : SublocationDisplayElement = next(iter_mapping[sl.classification])
@@ -54,6 +55,16 @@ class LocationElement(element.Element):
             while slde is not None:
                 slde.clear()
                 slde = next(it, None)
+
+    def set_tab_visibility(self, visible_tabs : Set[str]):
+        all_classifications = set(pokemon.Sublocation.classifications())
+        for classification in all_classifications:
+            if classification in visible_tabs:
+                self.tabs[classification].update(visible=True)
+                self.tabs[classification].set_focus()
+            else:
+                self.tabs[classification].update(visible=False)
+
 
     def layout(self):
         return  [ [self.title],

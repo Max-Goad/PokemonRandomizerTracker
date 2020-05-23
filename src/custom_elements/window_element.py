@@ -32,6 +32,28 @@ def filterByType(expected_type):
         return expected_type in (pkmn.type.primary, pkmn.type.secondary)
     return innerFilter
 
+def sortMoveByAttr(attr_name):
+    def innerSort(move_name):
+        assert move_name in database.instance.moves, f"can't find {move_name} in ingested moves"
+        theoretical_max = pokemon.Stats.Attribute.ATTR_MAX
+        # We subtract the actual from the theoretical max so the list is sorted in descending order
+        return theoretical_max - int(getattr(database.instance.moves[move_name], attr_name).value)
+    return innerSort
+
+def filterMoveByCategory(expected_category):
+    def innerFilter(move_name):
+        assert move_name in database.instance.moves, f"can't find {move_name} in ingested moves"
+        move = database.instance.moves[move_name]
+        return expected_category in (move.category.primary, move.category.secondary)
+    return innerFilter
+
+def filterMoveByType(expected_type):
+    def innerFilter(move_name):
+        assert move_name in database.instance.moves, f"can't find {move_name} in ingested moves"
+        move = database.instance.moves[move_name]
+        return expected_type in (move.type.primary, move.type.secondary)
+    return innerFilter
+
 
 class WindowElement(Element):
     def __init__(self):
@@ -57,17 +79,23 @@ class WindowElement(Element):
 
         self.display_tab = gui.Tab("Summary", [ [gui.Column(self.summary_slb.element.layout()), gui.Column([ *self.summary_slb.layout(),
                                                                                                                      [self.summary_add_to_team_builder_button],
-                                                                                                                    ], justification="right")],
+                                                                                                                    ], justification="left")],
                                               ])
 
         # Moves
         self.move_slb = SearchableListBox(MoveElement())
-        self.moves_tab = gui.Tab("Moves", [ [gui.Column(self.move_slb.element.layout()), gui.Sizer(500, 0), gui.Column(self.move_slb.layout(), justification="right")],
+        for attr_name in pokemon.Move.ALL_ATTR_NAMES:
+            self.move_slb.registerSort(pokemon.Stats.short_name(attr_name), sortMoveByAttr(attr_name))
+        for category in types.all_categories:
+            self.move_slb.registerFilter(category, filterMoveByCategory(category))
+        for type_name in types.all_types:
+            self.move_slb.registerFilter(type_name, filterMoveByType(type_name))
+        self.moves_tab = gui.Tab("Moves", [ [gui.Column(self.move_slb.element.layout()), gui.Sizer(350, 0), gui.Column(self.move_slb.layout(), justification="left")],
                                           ])
 
         # Locations
         self.location_slb = SearchableListBox(LocationElement())
-        self.locations_tab = gui.Tab("Locations", [ [gui.Column(self.location_slb.element.layout()), gui.Sizer(10, 0), gui.Column(self.location_slb.layout(), justification="right")],
+        self.locations_tab = gui.Tab("Locations", [ [gui.Column(self.location_slb.element.layout()), gui.Sizer(10, 0), gui.Column(self.location_slb.layout(), justification="left")],
                                                   ])
 
         # Team Builder

@@ -12,9 +12,13 @@ class Database:
         # TODO: Default should be ingested from file
         self.source_location : pathlib.Path = None
         self.theme : str = "Topanga"
+        self.version : pokemon.Version = None
         self.pokemon : Mapping[str, pokemon.Pokemon] = {}
         self.moves : Mapping[str, pokemon.Move] = {}
         self.locations : Mapping[str, pokemon.Location] = {}
+
+    def setVersion(self, version : pokemon.Version):
+        self.version = version
 
     def addPokemon(self, pkmn : List[pokemon.Pokemon]):
         for p in pkmn:

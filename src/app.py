@@ -108,6 +108,8 @@ def main():
                 gui.popup_error("Ingested file doesn't have a valid format!")
                 continue
 
+            database.instance.setVersion(ingester.extractVersion())
+
             # TODO: Ingester should just return list
             database.instance.addPokemon(list(ingester.extractPokemon().values()))
             # TODO: Move prints into ingester

@@ -1,4 +1,5 @@
 import abc
+import enum
 import collections
 from   typing import List
 import PySimpleGUI as gui
@@ -8,6 +9,40 @@ from src.external import utils
 
 def fix_unicode_name(name : str):
     return name.replace("â™€", "♀").replace("â™‚", "♂").replace("â€™", "'")
+
+class Version(enum.Enum):
+    RED = 1.0
+    BLUE = 1.0
+    YELLOW = 1.1
+    GOLD = 2.0
+    SILVER = 2.0
+    CRYSTAL = 2.1
+    RUBY = 3.0
+    SAPPHIRE = 3.0
+    EMERALD = 3.1
+    FIRERED = 3.2
+    LEAFGREEN = 3.2
+    DIAMOND = 4.0
+    PEARL = 4.0
+    PLATINUM = 4.1
+    HEARTGOLD = 4.2
+    SOULSILVER = 4.2
+    BLACK = 5.0
+    WHITE = 5.0
+    BLACK2 = 5.1
+    WHITE2 = 5.1
+
+    def gen(self):
+        return int(self.value)
+
+    def subgen(self):
+        return self.value
+
+    @staticmethod
+    def parse(string : str):
+        assert string.upper() in Version.__dict__, f"Version {string} doesn't map to a Version enum value"
+        return Version.__dict__[string.upper()]
+
 
 class Pokemon:
     def __init__(self, num, name, types, stats, abilities, items):

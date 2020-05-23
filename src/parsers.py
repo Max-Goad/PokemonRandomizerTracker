@@ -171,6 +171,8 @@ class RandomizerLogParser(parsers.FileParser):
             location_regex = fr"\s*(.+)\s+({'|'.join(pokemon.Sublocation.classifications())})"
             location_name, location_classification = parsers.getGroups(location_regex, raw_location_name.strip())
 
+            location_name = pokemon.fix_unicode_name(location_name)
+
             if location_name not in locations:
                 locations[location_name] = pokemon.Location(location_name)
 

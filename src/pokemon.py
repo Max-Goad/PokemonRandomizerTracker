@@ -8,7 +8,7 @@ from src import types
 from src.external import utils
 
 def fix_unicode_name(name : str):
-    return name.replace("â™€", "♀").replace("â™‚", "♂").replace("â€™", "'")
+    return name.replace("â™€", "♀").replace("â™‚", "♂").replace("â€™", "'").replace("Ã©", "é")
 
 class Version(enum.Enum):
     RED = 1.0

@@ -37,7 +37,7 @@ class LocationElement(element.Element):
     def update(self, location : pokemon.Location):
         self.title.update(f"{location.name}")
         iter_mapping = self.tab_element_iterators()
-        for sl in location.sublocations:
+        for sl in sorted(location.sublocations):
             element_to_fill : SublocationDisplayElement = next(iter_mapping[sl.classification])
             element_to_fill.update(sl)
         self.clear_tab_elements(iter_mapping)

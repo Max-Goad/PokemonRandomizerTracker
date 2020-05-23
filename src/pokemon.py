@@ -263,6 +263,9 @@ class Sublocation:
     def displayName(self):
         return f"{self.location_name} ({self.classification})"
 
+    def __lt__(self, other):
+        return self.set_num < other.set_num
+
     def __eq__(self, other):
         return (self.set_num, self.location_name, self.classification) == (other.set_num, other.location_name, other.classification)
 

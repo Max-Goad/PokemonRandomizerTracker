@@ -108,6 +108,8 @@ def main():
                 gui.popup_error("Ingested file doesn't have a valid format!")
                 continue
 
+            database.instance = database.Database()
+
             database.instance.setVersion(ingester.extractVersion())
 
             # TODO: Ingester should just return list
@@ -140,6 +142,7 @@ def main():
             # Update text
             file_ingested = True
             controller.instance.window['text_ingested_boolean'].update(file_ingested)
+            controller.instance.window['text_ingested_version'].update(database.instance.version.name)
 
             # Update combo boxs
             controller.instance.current_element.summary_slb.populate(database.instance.pokemon)

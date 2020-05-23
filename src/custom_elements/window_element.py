@@ -61,7 +61,7 @@ class WindowElement(Element):
         self.file_ingested = False
         self.ingest_button = gui.Button("Ingest", key="button_ingest")
         self.home_tab = gui.Tab("Home", [ [gui.InputText(key="input_text_file", default_text=database.default_source_location), gui.FileBrowse(button_text="Browse For Log File")] ,
-                                          [self.ingest_button, gui.Text(self.file_ingested, key="text_ingested_boolean")],
+                                          [self.ingest_button, gui.Text(self.file_ingested, key="text_ingested_boolean"), gui.Text("Version:"), gui.Text("", size=(15,1), key="text_ingested_version")],
                                           [gui.Button("Stat Averages", key="stat_averages"), gui.Button("Close"), gui.Button("???")],
                                         ])
 

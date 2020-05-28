@@ -5,14 +5,14 @@ from   typing import Mapping, List
 
 from src import pokemon
 from src.external import parsers, utils
-from src.external.parsers import InvalidFormatError
+from src.external.parsers import InvalidFormatError, RegexNotFoundError
 
 class RandomizerLogParser(parsers.FileParser):
     """ TODO: Documentation
     """
     VERSION_HEADER = r"Randomization of Pokemon (\w+).+completed"
     POKEMON_DISPLAY_HEADER = r"Pokemon Base Stats & Types"
-    POKEMON_MOVE_HEADER = r"Move Data"
+    POKEMON_MOVE_HEADER = r"--Move Data--"
     POKEMON_MOVESET_HEADER = r"Pokemon Movesets"
     LOCATION_HEADER = r"Wild Pokemon"
     WILD_POKEMON_HEADER = r"Wild Pokemon"

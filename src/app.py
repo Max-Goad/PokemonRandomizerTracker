@@ -117,10 +117,13 @@ def main():
             # TODO: Move prints into ingester
             print(f"Extracted {len(database.instance.pokemon)} pokemon")
 
-            # TODO: Ingester should just return list
-            database.instance.addMoves(list(ingester.extractMoves().values()))
-            # TODO: Move prints into ingester
-            print(f"Extracted {len(database.instance.moves)} moves")
+            try:
+                # TODO: Ingester should just return list
+                database.instance.addMoves(list(ingester.extractMoves().values()))
+                # TODO: Move prints into ingester?
+                print(f"Extracted {len(database.instance.moves)} moves")
+            except parsers.RegexNotFoundError:
+                print(f"Moves are unchanged... skipping")
 
             movesets = ingester.extractMovesets()
             database.instance.addMovesets(movesets)

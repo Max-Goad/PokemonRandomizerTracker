@@ -4,7 +4,6 @@ To run the tracker, run "python -m src" from the base directory. If you're missi
 
 ## Major TODOs:
 *  Display Tab - Pokemon Abilities
-*  Display Tab - Clicking on Location takes you to appropriate place in Location tab
 *  Moves Tab - Add TM notation
 *  (new) Items Tab
 *  Team Tab - Stat Analysis
@@ -12,6 +11,7 @@ To run the tracker, run "python -m src" from the base directory. If you're missi
 ## Minor TODOs:
 *  Refactor - Rename many files
 *  Refactor - Rename directory so you don't have to do "python -m src"
+*  Display Tab - Clicking on Location takes you to appropriate sublocation tab in Location tab
 *  Display Tab - Add trades to occurrences
 *  Display Tab - Add starters to occurrences
 *  Moves Tab - Filter by TM or not

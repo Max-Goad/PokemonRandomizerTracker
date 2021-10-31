@@ -181,6 +181,17 @@ def main():
             # Finally, switch tabs to the Moves tab
             controller.instance.current_element.moves_tab.select()
 
+
+        ################################################################################
+        elif event.startswith("summary_element_wild_occurrence_location_"):
+            print("==== Event: Display Location Click ====")
+            # Simulate a Location Selection search given the location clicked on
+            controller.instance.current_element.location_slb.input_text.update(controller.instance.window[event].DisplayText)
+            controller.instance.current_element.location_slb.button.click()
+
+            # Finally, switch tabs to the Locations tab
+            controller.instance.current_element.locations_tab.select()
+
         ################################################################################
         elif event.startswith("summary_add_to_team_builder_button"):
             print("=== Event: Add Pokemon To Team Builder ===")

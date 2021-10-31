@@ -4,7 +4,7 @@ from   typing import List, Mapping
 
 from src import pokemon
 
-default_source_location = "X:/Games/Emulators/Pokemon Randomizer/roms/Pokemon White Randomizer 2020.nds.log"
+default_source_location = "X:/Games/Emulators/Pokemon Randomizer/roms/Pokemon Black 2 Randomizer 2021.nds.log"
 default_theme = "Topanga"
 
 class Database:

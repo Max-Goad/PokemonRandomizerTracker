@@ -24,7 +24,7 @@ def getLinesFromFile(file, custom_strip_fn=lambda x: x):
     if '.gz' in file.suffixes:
         open_fn = lambda x: gzip.open(x,'rt')
     else:
-        open_fn = lambda x: open(x,'r')
+        open_fn = lambda x: open(x,'r',encoding="utf-8")
 
     with open_fn(file) as f:
         return [custom_strip_fn(line) for line in f]

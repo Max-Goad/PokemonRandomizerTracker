@@ -10,7 +10,7 @@ from src.external.parsers import InvalidFormatError, RegexNotFoundError
 class RandomizerLogParser(parsers.FileParser):
     """ TODO: Documentation
     """
-    VERSION_HEADER = r"Randomization of Pokemon (\w+).+completed"
+    VERSION_HEADER = r"Randomization of Pokemon (\w+(?: \d)?).+completed"
     POKEMON_DISPLAY_HEADER = r"Pokemon Base Stats & Types"
     POKEMON_MOVE_HEADER = r"--Move Data--"
     POKEMON_MOVESET_HEADER = r"Pokemon Movesets"

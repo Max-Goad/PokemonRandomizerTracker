@@ -40,8 +40,9 @@ class Version(enum.Enum):
 
     @staticmethod
     def parse(string : str):
-        assert string.upper() in Version.__dict__, f"Version {string} doesn't map to a Version enum value"
-        return Version.__dict__[string.upper()]
+        final_string = string.replace(' ', "").upper()
+        assert final_string in Version.__dict__, f"Version {string} doesn't map to a Version enum value"
+        return Version.__dict__[final_string]
 
 
 class Pokemon:

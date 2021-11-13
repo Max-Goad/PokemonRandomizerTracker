@@ -256,6 +256,83 @@ class RandomizerLogParser(parsers.FileParser):
 
         return dict(sorted(locations.items()))
 
+    def extractLocationsZX(self) -> Mapping[str, pokemon.Location]:
+        # Move marker back to start
+        self.reset()
+
+        # Find start
+        self.moveAndGetGroups(self.WILD_POKEMON_HEADER)
+
+        # Move past headers
+        self.current_line += 1
+
+        locations : Mapping[str, pokemon.Location] = {}
+
+        # Location Loop
+        while True:
+            line = self.lines[self.current_line]
+
+            location_values = parsers.getGroups(r"^Set #(\d+) - (.+)[(]rate=(\d+)[)]", line)
+            if location_values is None:
+                break
+            elif len(location_values) != 3:
+                break
+            # rate currently unused
+            set_num, raw_location, rate = location_values
+
+            # seperate the actual name from the classification
+            joined_sublocation_str = '|'.join(pokemon.Sublocation.classifications())
+            location_regex = fr"\s*(.+)\s+({joined_sublocation_str})"
+            location_name, location_classification = parsers.getGroups(location_regex, raw_location.strip())
+            location_name = pokemon.fix_unicode_name(location_name)
+
+            if location_name not in locations:
+                locations[location_name] = pokemon.Location(location_name)
+
+            # create a sublocation instance
+            sl = pokemon.Sublocation(set_num, location_name, location_classification)
+            locations[location_name].sublocations.add(sl)
+
+            # collect all pokemon instances at this location
+            pkmn_level_mapping = collections.defaultdict(set)
+            while True:
+                self.current_line += 1
+                line = self.lines[self.current_line]
+                if not line.strip():
+                    break
+
+                raw_pkmn = parsers.getGroups(r"(.+)\s+HP.+", line)
+                if raw_pkmn is None:
+                    print(f"Error parsing line as wild occurrence: ''{line}''")
+                    break
+                # Pokemon Level Mappings can come in 2 forms:
+                #   1) "Bulbasaur Lvs XX-YY"
+                #   2) "Bulbasaur LvXX"
+                # In any case, we must compile all these occurrences together into one mapping:
+                #   { "Bulbasaur" : (XX, YY) }
+                # where XX is the min, and YY is the max
+                if "Lvs" in raw_pkmn:
+                    pkmn_name, lvl_range = raw_pkmn.split(" Lvs ")
+                    pkmn_name = pokemon.fix_unicode_name(pkmn_name.strip())
+                    min_level, max_level = (int(l) for l in lvl_range.split('-'))
+                    pkmn_level_mapping[pkmn_name].update(range(min_level, max_level+1))
+                elif "Lv" in raw_pkmn:
+                    pkmn_name, level = raw_pkmn.split(" Lv")
+                    pkmn_name = pokemon.fix_unicode_name(pkmn_name.strip())
+                    pkmn_level_mapping[pkmn_name].add(int(level.strip()))
+
+            for pkmn_name, levels in pkmn_level_mapping.items():
+                sl.wild_occurrences.append(pokemon.WildOccurrence(pkmn_name, sl, levels))
+
+            self.current_line += 1
+
+        # Platinum has these unknown locations for some reason
+        # We have to get rid of them or they muck up the data.
+        if "? Unknown ?" in locations:
+            del locations["? Unknown ?"]
+
+        return dict(sorted(locations.items()))
+
     def extractStaticOccurrences(self):
         # Move marker back to start
         self.reset()

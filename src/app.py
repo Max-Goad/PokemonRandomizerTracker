@@ -140,15 +140,17 @@ def main():
                 print(f"Extracted movesets for {len(movesets)} pokemon")
 
             # TODO: Fix for new randomizer
-            if not database.instance.zxRandomizer():
+            if database.instance.zxRandomizer():
+                # TODO: Ingester should just return list
+                database.instance.addLocations(list(ingester.extractLocationsZX().values()))
+                print(f"Extracted {len(database.instance.locations)} locations (ZX)")
+            else:
                 # TODO: Ingester should just return list
                 database.instance.addLocations(list(ingester.extractLocations().values()))
                 print(f"Extracted {len(database.instance.locations)} locations")
 
-            # TODO: Fix for new randomizer
-            if not database.instance.zxRandomizer():
-                # Add wild occurrences to pokemon
-                database.instance.addWildOccurrencesToPokemon()
+            # Add wild occurrences to pokemon
+            database.instance.addWildOccurrencesToPokemon()
 
             # TODO: Fix for new randomizer
             if not database.instance.zxRandomizer():

@@ -254,6 +254,8 @@ class Sublocation:
                 "Grass/Cave", "Surfing",
                 # Platinum
                 "Old Rod", "Good Rod", "Super Rod", "Swarm/Radar/GBA",
+                # Platinum (ZX)
+                "Feebas Tiles", "Group", "Rotating Pokemon",
                 # White/Black
                 "Fishing", "Shaking Spots", "Surfing Spots", "Fishing Spots", "Doubles Grass",
                ]

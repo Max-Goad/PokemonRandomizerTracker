@@ -130,7 +130,11 @@ def main():
                 print(f"Moves are unchanged... skipping")
 
             # TODO: Fix for new randomizer
-            if not database.instance.zxRandomizer():
+            if database.instance.zxRandomizer():
+                movesets = ingester.extractMovesetsZX()
+                database.instance.addMovesets(movesets)
+                print(f"Extracted movesets for {len(movesets)} pokemon (ZX)")
+            else:
                 movesets = ingester.extractMovesets()
                 database.instance.addMovesets(movesets)
                 print(f"Extracted movesets for {len(movesets)} pokemon")

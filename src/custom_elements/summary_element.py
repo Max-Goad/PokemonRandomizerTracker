@@ -64,17 +64,16 @@ class SummaryElement(Element):
                 name_elem.update("")
                 rate_elem.update("")
 
-        # TODO: Fix for new randomizer
         # Moveset
-        # self.moveset_title_text.update("Moveset:")
-        # for i in range(len(self.moveset_rows)):
-        #     if i < len(pkmn.moveset.level_move_mappings):
-        #         level, move_name = pkmn.moveset.level_move_mappings[i]
-        #         self.moveset_rows[i][0].update(f"Level{level: >3} -")
-        #         self.moveset_rows[i][1].update(f"{move_name}")
-        #     else:
-        #         self.moveset_rows[i][0].update("")
-        #         self.moveset_rows[i][1].update("")
+        self.moveset_title_text.update("Moveset:")
+        for i in range(len(self.moveset_rows)):
+            if i < len(pkmn.moveset.level_move_mappings):
+                level, move_name = pkmn.moveset.level_move_mappings[i]
+                self.moveset_rows[i][0].update(f"Level{level: >3} -")
+                self.moveset_rows[i][1].update(f"{move_name}")
+            else:
+                self.moveset_rows[i][0].update("")
+                self.moveset_rows[i][1].update("")
 
         # TODO: Fix for new randomizer
         # Wild Occurrences

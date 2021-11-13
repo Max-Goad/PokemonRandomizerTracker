@@ -152,6 +152,42 @@ class RandomizerLogParser(parsers.FileParser):
             self.current_line += 1
         return movesets
 
+    def extractMovesetsZX(self):
+        # Move marker back to start
+        self.reset()
+
+        # Find start
+        self.moveAndGetGroups(self.POKEMON_MOVESET_HEADER)
+
+        # Move past headers
+        self.current_line += 1
+
+        movesets = []
+
+        while True:
+            # Find next pokemon
+            line = self.lines[self.current_line]
+            pkmn = parsers.getGroups(r"^\d+\s(.+)\s-> .+", line)
+            if pkmn is None:
+                break
+            pkmn_name = pokemon.fix_unicode_name(pkmn.strip())
+
+            # Move past stats (why the fuck are they even here to begin with)
+            self.current_line += 7
+
+            # Extract moves until empty line encountered
+            curr_moveset = pokemon.Moveset(pkmn_name)
+            while True:
+                line = self.lines[self.current_line]
+                if not line.strip():
+                    break
+                level, move_name = line[6:].strip().split(":")
+                curr_moveset.addMapping(int(level), move_name.strip())
+                self.current_line += 1
+            movesets.append(curr_moveset)
+            self.current_line += 1
+        return movesets
+
     def extractLocations(self) -> Mapping[str, pokemon.Location]:
         # Move marker back to start
         self.reset()

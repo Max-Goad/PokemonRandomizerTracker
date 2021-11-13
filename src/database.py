@@ -12,12 +12,21 @@ class Database:
         # TODO: Default should be ingested from file
         self.source_location : pathlib.Path = None
         self.theme : str = "Topanga"
+        self.rv_major : int = 0
+        self.rv_minor : int = 0
+        self.rv_patch : int = 0
         self.version : pokemon.Version = None
         self.pokemon : Mapping[str, pokemon.Pokemon] = {}
         self.moves : Mapping[str, pokemon.Move] = {}
         self.locations : Mapping[str, pokemon.Location] = {}
 
-    def setVersion(self, version : pokemon.Version):
+    def setRandomizerVersion(self, version_tuple):
+        [major_str, minor_str, patch_str] = version_tuple
+        self.rv_major = int(major_str)
+        self.rv_minor = int(minor_str)
+        self.rv_patch = int(patch_str)
+
+    def setPokemonVersion(self, version : pokemon.Version):
         self.version = version
 
     def addPokemon(self, pkmn : List[pokemon.Pokemon]):
@@ -58,5 +67,11 @@ class Database:
                 pkmn.addWildOccurrences(encounters[pkmn.name])
         # TODO: Is the print really in the right place/necessary?
         print(f"Extracted static occurrences for {len(encounters)} pokemon")
+
+    def randomizerVerionStr(self):
+        return f"{self.rv_major}.{self.rv_minor}.{self.rv_patch}"
+
+    def zxRandomizer(self):
+        return self.rv_major >= 4 and self.rv_minor >= 3
 
 instance = Database()

@@ -110,7 +110,11 @@ def main():
 
             database.instance = database.Database()
 
-            database.instance.setVersion(ingester.extractVersion())
+            database.instance.setRandomizerVersion(ingester.extractRandomizerVersion())
+            print(f"Detected randomizer version {database.instance.randomizerVerionStr()}")
+
+            database.instance.setPokemonVersion(ingester.extractPokemonVersion())
+            print(f"Detected pokemon version {database.instance.version}")
 
             # TODO: Ingester should just return list
             database.instance.addPokemon(list(ingester.extractPokemon().values()))
@@ -125,19 +129,27 @@ def main():
             except parsers.RegexNotFoundError:
                 print(f"Moves are unchanged... skipping")
 
-            movesets = ingester.extractMovesets()
-            database.instance.addMovesets(movesets)
-            print(f"Extracted movesets for {len(movesets)} pokemon")
+            # TODO: Fix for new randomizer
+            if not database.instance.zxRandomizer():
+                movesets = ingester.extractMovesets()
+                database.instance.addMovesets(movesets)
+                print(f"Extracted movesets for {len(movesets)} pokemon")
 
-            # TODO: Ingester should just return list
-            database.instance.addLocations(list(ingester.extractLocations().values()))
-            print(f"Extracted {len(database.instance.locations)} locations")
+            # TODO: Fix for new randomizer
+            if not database.instance.zxRandomizer():
+                # TODO: Ingester should just return list
+                database.instance.addLocations(list(ingester.extractLocations().values()))
+                print(f"Extracted {len(database.instance.locations)} locations")
 
-            # Add wild occurrences to pokemon
-            database.instance.addWildOccurrencesToPokemon()
+            # TODO: Fix for new randomizer
+            if not database.instance.zxRandomizer():
+                # Add wild occurrences to pokemon
+                database.instance.addWildOccurrencesToPokemon()
 
-            # Add static encounters to pokemon
-            database.instance.addStaticPokemonEncounters(ingester.extractStaticOccurrences())
+            # TODO: Fix for new randomizer
+            if not database.instance.zxRandomizer():
+                # Add static encounters to pokemon
+                database.instance.addStaticPokemonEncounters(ingester.extractStaticOccurrences())
 
             # Update Team Builder Screen
             controller.instance.current_element.team_analysis_element.update()

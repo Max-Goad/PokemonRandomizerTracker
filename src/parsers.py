@@ -10,7 +10,8 @@ from src.external.parsers import InvalidFormatError, RegexNotFoundError
 class RandomizerLogParser(parsers.FileParser):
     """ TODO: Documentation
     """
-    VERSION_HEADER = r"Randomization of Pokemon (\w+(?: \d)?).+completed"
+    RANDOMIZER_VERSION_HEADER = r"Randomizer Version: (\d+).(\d+).(\d+)"
+    POKEMON_VERSION_HEADER = r"Randomization of Pokemon (\w+(?: \d)?).+completed"
     POKEMON_DISPLAY_HEADER = r"Pokemon Base Stats & Types"
     POKEMON_MOVE_HEADER = r"--Move Data--"
     POKEMON_MOVESET_HEADER = r"Pokemon Movesets"
@@ -34,9 +35,16 @@ class RandomizerLogParser(parsers.FileParser):
         except parsers.RegexNotFoundError:
             return False
 
-    def extractVersion(self) -> pokemon.Version:
+    def extractRandomizerVersion(self):
         self.reset()
-        version_str = self.moveAndGetGroups(self.VERSION_HEADER)
+        try:
+            return self.moveAndGetGroups(self.RANDOMIZER_VERSION_HEADER)
+        except RegexNotFoundError:
+            return "0","0","0"
+
+    def extractPokemonVersion(self) -> pokemon.Version:
+        self.reset()
+        version_str = self.moveAndGetGroups(self.POKEMON_VERSION_HEADER)
         return pokemon.Version.parse(version_str)
 
 

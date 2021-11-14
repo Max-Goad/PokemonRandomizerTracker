@@ -129,7 +129,6 @@ def main():
             except parsers.RegexNotFoundError:
                 print(f"Moves are unchanged... skipping")
 
-            # TODO: Fix for new randomizer
             if database.instance.zxRandomizer():
                 movesets = ingester.extractMovesetsZX()
                 database.instance.addMovesets(movesets)
@@ -139,7 +138,6 @@ def main():
                 database.instance.addMovesets(movesets)
                 print(f"Extracted movesets for {len(movesets)} pokemon")
 
-            # TODO: Fix for new randomizer
             if database.instance.zxRandomizer():
                 # TODO: Ingester should just return list
                 database.instance.addLocations(list(ingester.extractLocationsZX().values()))
@@ -152,9 +150,10 @@ def main():
             # Add wild occurrences to pokemon
             database.instance.addWildOccurrencesToPokemon()
 
-            # TODO: Fix for new randomizer
-            if not database.instance.zxRandomizer():
                 # Add static encounters to pokemon
+            if database.instance.zxRandomizer():
+                database.instance.addStaticPokemonEncounters(ingester.extractStaticOccurrencesZX())
+            else:
                 database.instance.addStaticPokemonEncounters(ingester.extractStaticOccurrences())
 
             # Update Team Builder Screen

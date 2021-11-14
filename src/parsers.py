@@ -358,3 +358,28 @@ class RandomizerLogParser(parsers.FileParser):
             self.current_line += 1
 
         return static_pkmn_occurrences
+
+
+    def extractStaticOccurrencesZX(self):
+        # Move marker back to start
+        self.reset()
+
+        # Find start
+        self.moveAndGetGroups(self.STATIC_POKEMON_HEADER)
+
+        # Move past headers
+        self.current_line += 1
+
+        static_pkmn_occurrences = dict()
+
+        # Loop until empty line encountered
+        while True:
+            line = self.lines[self.current_line]
+            if not line.strip():
+                break
+
+            old, new = parsers.getGroups(r"(\w+),? (?:Lv\d+|[(]egg[)]) [=][>] (\w+),? (?:Lv\d+|[(]egg[)])", line)
+            static_pkmn_occurrences[new] = pokemon.WildOccurrence(new, pokemon.StaticSublocation(old), [])
+            self.current_line += 1
+
+        return static_pkmn_occurrences

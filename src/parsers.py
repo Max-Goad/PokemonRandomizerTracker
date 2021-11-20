@@ -378,7 +378,7 @@ class RandomizerLogParser(parsers.FileParser):
             if not line.strip():
                 break
 
-            old, new = parsers.getGroups(r"(\w+),? (?:Lv\d+|[(]egg[)]) [=][>] (\w+),? (?:Lv\d+|[(]egg[)])", line)
+            old, new = parsers.getGroups(r"(\w+),? (?:Lv\d+(?:[(]\d[)])?|[(]egg[)]) [=][>] (\w+),? (?:Lv\d+|[(]egg[)])", line)
             static_pkmn_occurrences[new] = pokemon.WildOccurrence(new, pokemon.StaticSublocation(old), [])
             self.current_line += 1
 

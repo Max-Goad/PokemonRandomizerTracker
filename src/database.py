@@ -72,6 +72,6 @@ class Database:
         return f"{self.rv_major}.{self.rv_minor}.{self.rv_patch}"
 
     def zxRandomizer(self):
-        return self.rv_major >= 4 and self.rv_minor >= 3
+        return self.rv_major >= 4 # and self.rv_minor >= 3
 
 instance = Database()

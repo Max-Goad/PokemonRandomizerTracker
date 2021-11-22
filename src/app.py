@@ -140,7 +140,7 @@ def main():
 
             if database.instance.zxRandomizer():
                 # TODO: Ingester should just return list
-                database.instance.addLocations(list(ingester.extractLocationsZX().values()))
+                database.instance.addLocations(list(ingester.extractLocationsZX(database.instance.version).values()))
                 print(f"Extracted {len(database.instance.locations)} locations (ZX)")
             else:
                 # TODO: Ingester should just return list
@@ -152,7 +152,7 @@ def main():
 
                 # Add static encounters to pokemon
             if database.instance.zxRandomizer():
-                database.instance.addStaticPokemonEncounters(ingester.extractStaticOccurrencesZX())
+                database.instance.addStaticPokemonEncounters(ingester.extractStaticOccurrencesZX(database.instance.version))
             else:
                 database.instance.addStaticPokemonEncounters(ingester.extractStaticOccurrences())
 

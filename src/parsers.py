@@ -256,7 +256,7 @@ class RandomizerLogParser(parsers.FileParser):
 
         return dict(sorted(locations.items()))
 
-    def extractLocationsZX(self) -> Mapping[str, pokemon.Location]:
+    def extractLocationsZX(self, version : pokemon.Version) -> Mapping[str, pokemon.Location]:
         # Move marker back to start
         self.reset()
 
@@ -281,8 +281,9 @@ class RandomizerLogParser(parsers.FileParser):
             set_num, raw_location, rate = location_values
 
             # seperate the actual name from the classification
-            joined_sublocation_str = '|'.join(pokemon.Sublocation.classifications())
+            joined_sublocation_str = '|'.join(pokemon.Sublocation.classifications(version))
             location_regex = fr"\s*(.+)\s+({joined_sublocation_str})"
+            print(f"Location Name = {raw_location.strip()}")
             location_name, location_classification = parsers.getGroups(location_regex, raw_location.strip())
             location_name = pokemon.fix_unicode_name(location_name)
 
@@ -360,7 +361,7 @@ class RandomizerLogParser(parsers.FileParser):
         return static_pkmn_occurrences
 
 
-    def extractStaticOccurrencesZX(self):
+    def extractStaticOccurrencesZX(self, pokemon_version : pokemon.Version):
         # Move marker back to start
         self.reset()
 
@@ -378,7 +379,13 @@ class RandomizerLogParser(parsers.FileParser):
             if not line.strip():
                 break
 
-            old, new = parsers.getGroups(r"(\w+),? (?:Lv\d+(?:[(]\d[)])?|[(]egg[)]) [=][>] (\w+),? (?:Lv\d+|[(]egg[)])", line)
+            if pokemon_version is pokemon.Version.HEARTGOLD or pokemon.Version.SOULSILVER:
+                regex = r"^([\w.-]+|Mr. Mime)(?:\(\d\)| \(egg\))? => ([\w.-]+|Mr. Mime)(?:\(\d\)| \(egg\))?"
+            else:
+                regex = r"(\w+),? (?:Lv\d+(?:[(]\d[)])?|[(]egg[)]) [=][>] (\w+),? (?:Lv\d+|[(]egg[)])"
+
+            print(f"line = {line.strip()}")
+            old, new = parsers.getGroups(regex, line.strip())
             static_pkmn_occurrences[new] = pokemon.WildOccurrence(new, pokemon.StaticSublocation(old), [])
             self.current_line += 1
 

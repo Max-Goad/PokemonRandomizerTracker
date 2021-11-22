@@ -32,7 +32,7 @@ class LocationElement(element.Element):
         self.tabs : Mapping[str, gui.Tab] = {}
         for classification in pokemon.Sublocation.classifications():
             self.tab_elements[classification] = [SublocationDisplayElement() for i in range(35)]
-            self.tabs[classification] = gui.Tab(classification, [[gui.Column([slde.layout() for slde in self.tab_elements[classification]], scrollable=True, vertical_scroll_only=True)]])
+            self.tabs[classification] = gui.Tab(classification, [[gui.Column([slde.layout() for slde in self.tab_elements[classification]], scrollable=True, vertical_scroll_only=True)]], visible=False)
 
     def update(self, location : pokemon.Location):
         self.title.update(f"{location.name}")

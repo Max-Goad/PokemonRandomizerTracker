@@ -248,8 +248,16 @@ class Location:
 
 class Sublocation:
     @staticmethod
-    def classifications():
-        return [
+    def classifications(version : Version = None):
+        if version is Version.HEARTGOLD or Version.SOULSILVER:
+            return [
+                # All Games
+                "Grass/Cave", "Surfing", "Old Rod", "Good Rod", "Super Rod", "Fishing Swarm",
+                # HeartGold/SoulSilver
+                "Swarms", "Hoenn/Sinnoh Radio", "Rock Smash", "Headbutt", "Contest", "Night Fishing Replacement",
+                ]
+        else:
+            return [
                 # All Games
                 "Grass/Cave", "Surfing",
                 # Platinum
@@ -258,7 +266,9 @@ class Sublocation:
                 "Feebas Tiles", "Group", "Rotating Pokemon",
                 # White/Black
                 "Fishing", "Shaking Spots", "Surfing Spots", "Fishing Spots", "Doubles Grass",
-               ]
+                # HeartGold/SoulSilver
+                "Swarms", "Hoenn/Sinnoh Radio", "Rock Smash", "Headbutt", "Contest", "Night Fishing Replacement",
+                ]
 
     def __init__(self, set_num, location_name, classification):
         self.set_num = set_num

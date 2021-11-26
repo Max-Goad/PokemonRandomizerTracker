@@ -117,7 +117,7 @@ def main():
             print(f"Detected pokemon version {database.instance.version}")
 
             # TODO: Ingester should just return list
-            database.instance.addPokemon(list(ingester.extractPokemon().values()))
+            database.instance.addPokemon(list(ingester.extractPokemon(database.instance.zxRandomizer()).values()))
             # TODO: Move prints into ingester
             print(f"Extracted {len(database.instance.pokemon)} pokemon")
 

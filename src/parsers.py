@@ -48,7 +48,7 @@ class RandomizerLogParser(parsers.FileParser):
         return pokemon.Version.parse(version_str)
 
 
-    def extractPokemon(self):
+    def extractPokemon(self, zx = False):
         # Move marker back to start
         self.reset()
 
@@ -80,6 +80,13 @@ class RandomizerLogParser(parsers.FileParser):
             name = pokemon.fix_unicode_name(pkmn_pieces[1])
             types = pkmn_pieces[2].split("/")
             stats = pkmn_pieces[3:9]
+            # MAX TODO: It's a bit ugly to do it this way. Gotta find a better way.
+            #           But it's also ugly to change the god damn order of the stats output, damn it!
+            if zx:
+                # Reorder stats
+                # From: HP, AT, DE, SA, SD, SP
+                # To:   HP, AT, DE, SP, SA, SD
+                stats[:] = [stats[i] for i in [0, 1, 2, 5, 3, 4]]
             abilities = [a for a in pkmn_pieces[9:9+num_abilities] if a != '-']
             items = [i for i in pkmn_pieces[9+num_abilities].split(",") if i]
 
